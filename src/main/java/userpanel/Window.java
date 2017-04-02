@@ -20,6 +20,7 @@ public class Window
 		primaryStage.setTitle("FFSM Navigator");
 		primaryStage.setScene(new Scene(root, 1174, 722));
 		primaryStage.show();
+
 	}
 
 
