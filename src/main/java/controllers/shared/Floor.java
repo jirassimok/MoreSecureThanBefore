@@ -37,16 +37,39 @@ public class Floor implements FloorImage
 	}
 
 	// Linked list containing the string names of the different floor images.
-	private LinkedList<String> thumbnails = new LinkedList<>(Arrays.asList(
-			"/t_building1_1.png", "/t_building1_2.png", "/t_building1_3.png",
-			"/t_building1_4.png", "/t_building1_5.png", "/t_building1_6.png",
-			"/t_building1_7.png"));
+	private LinkedList<String> building1Thumbnails = new LinkedList<>();
+
+	//private LinkedList<String> building2Thumbnals = new
+
+	private static HashMap<String, LinkedList<String>> ALL_THUMBS = new HashMap<>();
+	static {
+		LinkedList<String> building1Thumbs = new LinkedList<>();
+		building1Thumbs.add("/t_building1_1.png");
+		building1Thumbs.add("/t_building1_2.png");
+		building1Thumbs.add("/t_building1_3.png");
+		building1Thumbs.add("/t_building1_4.png");
+		building1Thumbs.add("/t_building1_5.png");
+		building1Thumbs.add("/t_building1_6.png");
+		building1Thumbs.add("/t_building1_7.png");
+		ALL_THUMBS.put("BUILDING1", building1Thumbs);
+
+		LinkedList<String> building2Thumbs = new LinkedList<>();
+		building2Thumbs.add("/t_building21.png");
+		building2Thumbs.add("/t_building22.png");
+		building2Thumbs.add("/t_building23.png");
+		building2Thumbs.add("/t_building24.png");
+		ALL_THUMBS.put("BUILDING2", building2Thumbs);
+
+		LinkedList<String> outsideThumbs = new LinkedList<>();
+		outsideThumbs.add("/t_outside.png");
+		ALL_THUMBS.put("OUTSIDE", outsideThumbs);
+	}
 
 	// constructor for the floor class
 	public Floor(String building, int floorNum) {
 		this.floorNum = floorNum;
 		this.path = getFlImg().get(building).get(floorNum - 1);
-		this.thumbPath = thumbnails.get(floorNum - 1);
+		this.thumbPath = ALL_THUMBS.get(building.toUpperCase()).get(floorNum - 1);
 	}
 
 	/** takes the String name of the path attribute and loads the image attached to that path
