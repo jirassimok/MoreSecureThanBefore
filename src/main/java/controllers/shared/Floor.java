@@ -61,7 +61,7 @@ public class Floor implements FloorImage
 		ALL_THUMBS.put("BUILDING2", building2Thumbs);
 
 		LinkedList<String> outsideThumbs = new LinkedList<>();
-		outsideThumbs.add("/t_outside.png");
+		outsideThumbs.add("/t_outsidearea.png");
 		ALL_THUMBS.put("OUTSIDE", outsideThumbs);
 	}
 
