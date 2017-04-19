@@ -2,13 +2,8 @@ package controllers.shared;
 
 import javafx.scene.image.Image;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
-/**
- * Created by tbasl_000 on 4/8/2017.
- */
 public class FloorProxy implements FloorImage
 {
 
@@ -39,36 +34,69 @@ public class FloorProxy implements FloorImage
 		}
 		return floor.displayThumb();
 	}
+
+	@Override
+	public String getName() {
+		return this.building;
+	}
+
+	@Override
+	public int getNumber() {
+		return this.floorNum;
+	}
 	// create floorProxies for every floor
-	private static FloorProxy building1Floor1 = new FloorProxy("Building1",1);
-	private static FloorProxy building1Floor2 = new FloorProxy("Building1",2);
-	private static FloorProxy building1Floor3 = new FloorProxy("Building1",3);
-	private static FloorProxy building1Floor4 = new FloorProxy("Building1",4);
-	private static FloorProxy building1Floor5 = new FloorProxy("Building1",5);
-	private static FloorProxy building1Floor6 = new FloorProxy("Building1",6);
-	private static FloorProxy building1Floor7 = new FloorProxy("Building1",7);
-	private static FloorProxy building2Floor1 = new FloorProxy("Building2", 1);
-	private static FloorProxy building2Floor2 = new FloorProxy("Building2", 2);
-	private static FloorProxy building2Floor3 = new FloorProxy("Building2", 3);
-	private static FloorProxy building2Floor4 = new FloorProxy("Building2", 4);
-	private static FloorProxy outsideFloor = new FloorProxy("Outside", 1);
 
-	private static LinkedList<FloorProxy> building1Maps = new LinkedList<>(
-			Arrays.asList(building1Floor1, building1Floor2, building1Floor3, building1Floor4,
-					building1Floor5, building1Floor6, building1Floor7));
+//	private static HashMap<String, LinkedList<FloorProxy>> EVERYTHING;
+//	static {
+//		LinkedList<FloorProxy> building1 = new LinkedList<>(Arrays.asList(
+//				new FloorProxy("Building1",1),
+//				new FloorProxy("Building1",2),
+//				new FloorProxy("Building1",3),
+//				new FloorProxy("Building1",4),
+//				new FloorProxy("Building1",5),
+//				new FloorProxy("Building1",6),
+//				new FloorProxy("Building1",7)
+//		));
+//		LinkedList<FloorProxy> building2 = new LinkedList<>(Arrays.asList(
+//				new FloorProxy("Building2", 1),
+//				new FloorProxy("Building2", 2),
+//				new FloorProxy("Building2", 3),
+//				new FloorProxy("Building2", 4)
+//		));
+//		LinkedList<FloorProxy> outside = new LinkedList<>();
+//		outside.add(new FloorProxy("Outside", 1));
+//
+//		EVERYTHING = new HashMap<>();
+//		EVERYTHING.put("BUILDING1", building1);
+//		EVERYTHING.put("BUILDING2", building2);
+//		EVERYTHING.put("OUTSIDE", outside);
+//	}
 
-	private static LinkedList<FloorProxy> building2Maps = new LinkedList<>(
-			Arrays.asList(building2Floor1, building2Floor2, building2Floor3, building2Floor4));
+	private static LinkedList<FloorProxy> FLOORS = new LinkedList<>(Arrays.asList(
+				new FloorProxy("Building1",1),
+				new FloorProxy("Building1",2),
+				new FloorProxy("Building1",3),
+				new FloorProxy("Building1",4),
+				new FloorProxy("Building1",5),
+				new FloorProxy("Building1",6),
+				new FloorProxy("Building1",7),
+				new FloorProxy("Building2", 1),
+				new FloorProxy("Building2", 2),
+				new FloorProxy("Building2", 3),
+				new FloorProxy("Building2", 4),
+				new FloorProxy("Outside", 1)));
 
-	private static LinkedList<FloorProxy> outsideMaps = new LinkedList<>(
-			Arrays.asList(outsideFloor));
+	/**
+	 * Get a floor by building and number
+	 */
+	public static FloorProxy getFloor(String building, int floorNum) {
+		return FLOORS.stream()
+				.filter(floor -> (floor.getNumber() == floorNum) && (floor.getName().compareToIgnoreCase(building) == 0))
+				.findAny().orElse(null);
+		//return EVERYTHING.get(building).get(floorNum-1);
+	}
 
-	private static HashMap<String, LinkedList<FloorProxy>> floorMaps = new HashMap<>();
-
-	public static HashMap<String, LinkedList<FloorProxy>> getFloorMaps() {
-		floorMaps.put("Building1", building1Maps);
-		floorMaps.put("Building2", building2Maps);
-		floorMaps.put("Outside", outsideMaps);
-		return floorMaps;
+	public static List<FloorProxy> getFloors() {
+		return new ArrayList<>(FloorProxy.FLOORS);
 	}
 }
