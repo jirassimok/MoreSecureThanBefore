@@ -38,9 +38,9 @@ public class Floor implements FloorImage
 
 	// Linked list containing the string names of the different floor images.
 	private LinkedList<String> thumbnails = new LinkedList<>(Arrays.asList(
-			"/Thumb_First_Floor.png", "/Thumb_Second_Floor.png", "/Thumb_Third_Floor.png",
-			"/Thumb_Fourth_Floor.png", "/Thumb_Fifth_Floor.png", "/Thumb_Sixth_Floor.png",
-			"/Thumb_Seventh_Floor.png"));
+			"/t_building1_1.png", "/t_building1_2.png", "/t_building1_3.png",
+			"/t_building1_4.png", "/t_building1_5.png", "/t_building1_6.png",
+			"/t_building1_7.png"));
 
 	// constructor for the floor class
 	public Floor(String building, int floorNum) {
