@@ -1,6 +1,7 @@
 package entities;
 
 import javafx.scene.image.Image;
+import main.ApplicationController;
 
 import java.util.*;
 
@@ -45,32 +46,6 @@ public class FloorProxy implements FloorImage
 		return this.floorNum;
 	}
 	// create floorProxies for every floor
-
-//	private static HashMap<String, LinkedList<FloorProxy>> EVERYTHING;
-//	static {
-//		LinkedList<FloorProxy> building1 = new LinkedList<>(Arrays.asList(
-//				new FloorProxy("Building1",1),
-//				new FloorProxy("Building1",2),
-//				new FloorProxy("Building1",3),
-//				new FloorProxy("Building1",4),
-//				new FloorProxy("Building1",5),
-//				new FloorProxy("Building1",6),
-//				new FloorProxy("Building1",7)
-//		));
-//		LinkedList<FloorProxy> building2 = new LinkedList<>(Arrays.asList(
-//				new FloorProxy("Building2", 1),
-//				new FloorProxy("Building2", 2),
-//				new FloorProxy("Building2", 3),
-//				new FloorProxy("Building2", 4)
-//		));
-//		LinkedList<FloorProxy> outside = new LinkedList<>();
-//		outside.add(new FloorProxy("Outside", 1));
-//
-//		EVERYTHING = new HashMap<>();
-//		EVERYTHING.put("BUILDING1", building1);
-//		EVERYTHING.put("BUILDING2", building2);
-//		EVERYTHING.put("OUTSIDE", outside);
-//	}
 
 	private static LinkedList<FloorProxy> FLOORS = new LinkedList<>(Arrays.asList(
 				new FloorProxy("Building1",1),
