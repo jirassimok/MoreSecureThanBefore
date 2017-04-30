@@ -1,5 +1,6 @@
 package entities;
 
+import javafx.geometry.Bounds;
 import javafx.scene.image.Image;
 import main.ApplicationController;
 
@@ -9,10 +10,12 @@ public class FloorProxy implements FloorImage
 {
 
 	private String building;
+	protected Viewport defaultView;
 	private int floorNum;
 	private Floor floor;
 
-	public FloorProxy(String building, int floor) {
+	public FloorProxy(String building, int floor, Viewport defaultView) {
+		this.defaultView = defaultView;
 		this.building = building;
 		this.floorNum = floor;
 	}
@@ -36,6 +39,10 @@ public class FloorProxy implements FloorImage
 		return floor.displayThumb();
 	}
 
+	public static Viewport getDefaultView(String building, int floorNum){
+		return FloorProxy.getFloor(building, floorNum).defaultView;
+	}
+
 	@Override
 	public String getName() {
 		return this.building;
@@ -48,18 +55,18 @@ public class FloorProxy implements FloorImage
 	// create floorProxies for every floor
 
 	private static LinkedList<FloorProxy> FLOORS = new LinkedList<>(Arrays.asList(
-				new FloorProxy("Building1",1),
-				new FloorProxy("Building1",2),
-				new FloorProxy("Building1",3),
-				new FloorProxy("Building1",4),
-				new FloorProxy("Building1",5),
-				new FloorProxy("Building1",6),
-				new FloorProxy("Building1",7),
-				new FloorProxy("Building2", 1),
-				new FloorProxy("Building2", 2),
-				new FloorProxy("Building2", 3),
-				new FloorProxy("Building2", 4),
-				new FloorProxy("Outside", 1)));
+				new FloorProxy("Building1",1, new Viewport(100, 200, 100, 200)),
+				new FloorProxy("Building1",2, new Viewport(100, 300, 100, 300)),
+				new FloorProxy("Building1",3, new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building1",4, new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building1",5, new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building1",6, new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building1",7, new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building2", 1,  new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building2", 2,  new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building2", 3,  new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Building2", 4,  new Viewport(50, 300, 50, 300)),
+				new FloorProxy("Outside", 1, new Viewport(50, 300, 50, 300))));
 
 	/**
 	 * Get a floor by building and number
@@ -82,6 +89,22 @@ public class FloorProxy implements FloorImage
 		sb.append(" floor ");
 		sb.append(this.getNumber());
 		return sb.toString();
+	}
+
+
+	public static class Viewport
+	{
+		public double minX;
+		public double maxX;
+		public double minY;
+		public double maxY;
+
+		public Viewport(double minX, double maxX, double minY, double maxY){
+			this.minX = minX;
+			this.maxX = maxX;
+			this.minY = minY;
+			this.maxY = maxY;
+		}
 	}
 
 }
