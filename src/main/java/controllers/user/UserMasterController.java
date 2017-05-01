@@ -261,6 +261,60 @@ public class UserMasterController
 		}
 	}
 
+	@Override
+	protected void setHotkeys(){
+		parentBorderPane.setOnKeyPressed(e -> {
+			//TODO add functionality for zooming with hotkeys
+
+			if (e.getCode() == KeyCode.RIGHT && e.isShiftDown()) {
+				contentAnchor.setTranslateX(contentAnchor.getTranslateX() - 10);
+			} else if (e.getCode() == KeyCode.LEFT && e.isShiftDown()) {
+				contentAnchor.setTranslateX(contentAnchor.getTranslateX() + 10);
+			} else if (e.getCode() == KeyCode.UP && e.isShiftDown()) {
+				contentAnchor.setTranslateY(contentAnchor.getTranslateY() + 10);
+			} else if (e.getCode() == KeyCode.DOWN && e.isShiftDown()) {
+				contentAnchor.setTranslateY(contentAnchor.getTranslateY() - 10);
+			} else if (e.getCode() == KeyCode.DIGIT1 && e.isShiftDown()){
+				FloorProxy floor = FloorProxy.getFloor("OUTSIDE", 1);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT1 && e.isControlDown()){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING2", 1);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT2 && e.isControlDown()){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING2", 2);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT3 && e.isControlDown()){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING2", 3);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT4 && e.isControlDown()){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING2", 4);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT1){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 1);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT2){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 2);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT3){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 3);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT4){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 4);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT5){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 5);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT6){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 6);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			} else if (e.getCode() == KeyCode.DIGIT7){
+				FloorProxy floor = FloorProxy.getFloor("BUILDING1", 7);
+				if (floor != null) floorComboBox.getSelectionModel().select(floor);
+			}
+			e.consume();
+		});
+	}
+
 
 	/**
 	 * Initialize the floor's choice box with 1-7 (the floors)
