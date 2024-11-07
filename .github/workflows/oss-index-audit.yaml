@@ -1,0 +1,16 @@
+name: 'Sonatype Scans'
+on: 'workflow_dispatch'
+jobs:
+  OSSIndexAudit:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@v4'
+      - uses: 'actions/setup-java@v4'
+        with:
+          distribution: 'zulu'
+          java-version: '8.0.432'
+          java-package: 'jdk+fx'
+          cache: 'gradle'
+      - name: Run audit
+        run: |
+          ./gradlew ossIndexAudit
