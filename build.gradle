@@ -10,6 +10,7 @@
 buildscript { // this stuff operates on the rest of the scrpt; adds plugin for the script itself
     dependencies {
         classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+        classpath group: 'org.sonatype.gradle.plugins', name: 'scan-gradle-plugin', version: '2.8.3'
     }
     repositories {
         mavenLocal()
@@ -21,6 +22,7 @@ buildscript { // this stuff operates on the rest of the scrpt; adds plugin for t
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'javafx-gradle-plugin'
+apply plugin: 'org.sonatype.gradle.plugins.scan'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
