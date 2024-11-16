@@ -29,7 +29,7 @@ public class WelcomeController implements Initializable
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		ImageView imageView = new ImageView(new Image("/building1_welcome.png"));
+		ImageView imageView = new ImageView(new Image("/welcome.png"));
 		Pane bottomColor = new Pane();
 
 		this.welcome.getChildren().add(bottomColor);
