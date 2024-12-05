@@ -78,7 +78,7 @@ public class EditingCell extends TableCell<Account, String> {
 					cancelEdit();
 				} else if (t.getCode() == KeyCode.TAB) {
 					commitEdit(textField.getText());
-					TableColumn nextColumn = getNextColumn(!t.isShiftDown());
+					TableColumn<Account, ?> nextColumn = getNextColumn(!t.isShiftDown());
 					if (nextColumn != null) {
 						getTableView().edit(getTableRow().getIndex(), nextColumn);
 					}

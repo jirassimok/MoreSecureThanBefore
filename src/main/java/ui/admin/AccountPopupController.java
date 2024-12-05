@@ -21,9 +21,9 @@ public class AccountPopupController
 {
 	@FXML private Button doneBtn;
 	@FXML private TableView<Account> accountTableView;
-	@FXML private TableColumn usernameCol;
-	@FXML private TableColumn passwordCol;
-	@FXML private TableColumn permissionsCol;
+	@FXML private TableColumn<Account, String> usernameCol;
+	@FXML private TableColumn<Account, String> passwordCol;
+	@FXML private TableColumn<Account, String> permissionsCol;
 	@FXML private Label existsError;
 
 	Account selectedAccount;
@@ -39,7 +39,7 @@ public class AccountPopupController
 
 		accountTableView.getItems().setAll(getDirectory().getAccounts().values());
 
-		Callback<TableColumn, TableCell> cellFactory = p -> new EditingCell();
+		Callback<TableColumn<Account, String>, TableCell<Account, String>> cellFactory = p -> new EditingCell();
 
 		permissionsCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Account, String>, ObservableValue<String>>() {
 			@Override
