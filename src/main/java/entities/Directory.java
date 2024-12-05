@@ -22,12 +22,11 @@ public class Directory
 	private Set<Node> nodes;
 	private Set<Room> rooms;
 	private Set<Professional> professionals;
+	private AccountManager accountManager;
 	private Room kiosk;
-	private boolean loggedIn;
 
 	private long timeout = 50;
 	private Caretaker caretaker;
-	private Map<String, Account> Accounts;
 	private FloorImage floor;
 	private Map<String, Viewport> defaultViews;
 
@@ -45,12 +44,11 @@ public class Directory
 	public Directory() {
 		this.nodes = new HashSet<>();
 		this.rooms = new HashSet<>();
-		this.Accounts = new HashMap<>();
+		this.accountManager = new AccountManager();
 		this.defaultViews = new HashMap<>();
 		this.professionals = new TreeSet<>(); // these are sorted
 		this.kiosk = null;
 		this.floor = FloorProxy.getFloor("BUILDING1", 1);
-		this.loggedIn = false;
 	}
 
 	public void resetFloor() {
@@ -73,7 +71,7 @@ public class Directory
 
 
 	public boolean isProfessional() {
-		return loggedIn;
+		return this.accountManager.isProfessional();
 	}
 
 	/**
@@ -120,42 +118,40 @@ public class Directory
 	}
 
 	public Account addAccount(String user, String password, String permission){
-		Account newAccount = new Account(user, password, permission);
-		this.Accounts.put(user, newAccount);
-		return newAccount;
+		return this.accountManager.addAccount(user, password, permission);
 	}
 
 	public void deleteAccount(String user){
-		this.Accounts.remove(user);
+		this.accountManager.deleteAccount(user);
 	}
 
 	public void updateKey(String newName, String oldName){
-		Account tempAccount = Accounts.get(oldName);
-		Accounts.remove(oldName);
-		Accounts.put(newName, tempAccount);
+		accountManager.updateKey(newName, oldName);
 	}
 
 	/* Account/login functions */
 	public void logIn() {
-		this.loggedIn = true;
+		this.accountManager.logIn();
 	}
 
 	public void logOut() {
-		this.loggedIn = false;
+		this.accountManager.logOut();
 	}
 
-	public boolean isLoggedIn() { return this.loggedIn; }
+	public boolean isLoggedIn() {
+		return this.accountManager.isLoggedIn();
+	}
 
 	public Map<String, Account> getAccounts(){
-		return Accounts;
+		return this.accountManager.getAccounts();
 	}
 
 	public String getPermissions(String username){
-		return Accounts.get(username).getPermissions();
+		return this.accountManager.getPermissions(username);
 	}
 
 	public Account getAccount(String username){
-		return Accounts.get(username);
+		return this.accountManager.getAccount(username);
 	}
 
 	/* Element removal methods */
@@ -212,7 +208,7 @@ public class Directory
 	}
 	public Node addNewRoomNode(double x, double y, FloorImage floor, String name, String shortName, String desc) {
 		Room newRoom = new Room(name, shortName, desc);
-		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), loggedIn);
+		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), this.accountManager.isLoggedIn());
 		newRoom.setLocation(newNode);
 		newNode.setRoom(newRoom);
 		this.nodes.add(newNode);
@@ -267,14 +263,14 @@ public class Directory
 	 */
 	public Node addNewNode(double x, double y, FloorImage floor) {
 		if (floor == null) throw new RuntimeException("Tried to create node with null floor");
-		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), loggedIn);
+		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), this.accountManager.isLoggedIn());
 		this.nodes.add(newNode);
 		return newNode;
 	}
 
 	//use this only for DB loading from CSV
 	public Node addNewNode(double x, double y, int floor, String buildingName) {
-		Node newNode = new Node(x, y, floor, buildingName, loggedIn);
+		Node newNode = new Node(x, y, floor, buildingName, this.accountManager.isLoggedIn());
 		this.nodes.add(newNode);
 		return newNode;
 	}
@@ -303,7 +299,7 @@ public class Directory
 				(node.getFloor() == floor.getNumber())
 						&&
 				node.getBuildingName().equalsIgnoreCase(floor.getName())
-						&& (! node.isRestricted() || this.loggedIn));
+						&& (! node.isRestricted() || this.accountManager.isLoggedIn()));
 	}
 
 	/**
@@ -317,7 +313,7 @@ public class Directory
 		return this.filterRooms(room -> (room.getLocation() != null)
 				&& (room.getLocation().getFloor() == this.floor.getNumber())
 				&& room.getLocation().getBuildingName().equalsIgnoreCase(this.floor.getName())
-				&& (! room.getLocation().isRestricted() || this.loggedIn));
+				&& (! room.getLocation().isRestricted() || this.accountManager.isLoggedIn()));
 	}
 
 	/**
@@ -492,7 +488,7 @@ public class Directory
 	 */
 	public Set<Node> getNodeNeighbors(Node node) {
 		Set<Node> neighbors = this.getAllNodeNeighbors(node);
-		if (! this.loggedIn) {
+		if (! this.accountManager.isLoggedIn()) {
 			neighbors.removeIf(Node::isRestricted);
 		}
 		return neighbors;
