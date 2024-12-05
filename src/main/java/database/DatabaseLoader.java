@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import entities.*;
+import entities.Account.AccessLevel;
 
 // Feel free to remove all the commented-out PRINTs and PRINTLNs once everything works
 
@@ -38,7 +39,7 @@ class DatabaseLoader
 		this.db_connection = dbConn.getConnection();
 	}
 
-	Directory getDirectory() {
+	Directory getDirectory() throws DatabaseException {
 		Directory dir = new Directory();
 		this.populateDirectory(dir);
 		return dir;
@@ -48,9 +49,10 @@ class DatabaseLoader
 	 *
 	 *
 	 * @param directory The directory to populate
-	 * @return True if success, false if failure
+	 *
+	 * @throws DatabaseException If the data could not be loaded from the database.
 	 */
-	private boolean populateDirectory(Directory directory) {
+	private void populateDirectory(Directory directory) throws DatabaseException {
 		Map<Integer, Room> rooms = new HashMap<>();
 		Integer kioskID = null; // (should be Optional<Integer>) not in use
 		try {
@@ -64,8 +66,7 @@ class DatabaseLoader
 			this.retrieveTimeoutDuration(directory);// TODO: REVIEW -TED
 		} catch (SQLException e){
 			e.printStackTrace();
-			System.err.println("A SQL Exception occured");
-			return false;
+			throw new DatabaseException("A SQL Exception occurred: " + e.getMessage(), e);
 		}
 
 		System.out.println("Kiosk is " + kioskID);
@@ -75,15 +76,13 @@ class DatabaseLoader
 
 		if(!directory.getAccounts().values().stream().anyMatch(a->"admin".equals(a.getPermissions()))) {
 			System.out.println("No admin exists, setting default admin to 'admin' 'password'");
-			directory.addAccount("admin", "password", "admin");
+			directory.addAccount("admin", "password", AccessLevel.ADMIN);
 		}
 
 		if(!directory.getAccounts().values().stream().anyMatch(a->"professional".equals(a.getPermissions()))) {
 			System.out.println("No professional exists, setting default professional to 'professional' 'password'");
-			directory.addAccount("professional", "password", "professional");
+			directory.addAccount("professional", "password", AccessLevel.PROFESSIONAL);
 		}
-
-		return true;
 	}
 
 	/** This method is not in use because we are not using kiosks at the moment */
@@ -222,17 +221,28 @@ class DatabaseLoader
 	/**Retrieves users and password hashes from the database and populates the given hash maps
 	 *
 	 * @param directory The directory to populate
+	 * @throws DatabaseException If a user has invalid permissions.
 	 */
 
-	private void retrieveUserData(Directory directory) throws SQLException{
+	private void retrieveUserData(Directory directory) throws DatabaseException, SQLException {
 		try {
 			//populate Users
 			Statement queryUsers = this.db_connection.createStatement();
 			ResultSet resultUsers = queryUsers.executeQuery(StoredProcedures.procRetrieveUsers());
 			while (resultUsers.next()) {
-				directory.addAccount(resultUsers.getString("userID"),
+				String name = resultUsers.getString("userID");
+				String savedPermission = resultUsers.getString("permission");
+				AccessLevel permission;
+				try {
+					permission = AccessLevel.valueOf(savedPermission);
+				} catch (IllegalArgumentException e) {
+					throw new DatabaseException(String.format(
+							"User has invalid permissions '%s'; database may be corrupt.",
+							savedPermission));
+				}
+				directory.addAccount(name,
 						resultUsers.getString("passHash"),
-						resultUsers.getString("permission"));
+						permission);
 			}
 			resultUsers.close();
 			queryUsers.close();

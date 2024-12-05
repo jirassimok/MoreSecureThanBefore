@@ -56,9 +56,11 @@ public class DatabaseWrapper
 	}
 
 	/**
-	 * Create and popualte a directory from the database
+	 * Create and populate a directory from the database
+	 *
+	 * @throws DatabaseException If the database could not be loaded.
 	 */
-	public Directory getDirectory() {
+	public Directory getDirectory() throws DatabaseException {
 		return DBLoader.getDirectory();
 	}
 }

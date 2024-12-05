@@ -43,7 +43,9 @@ public class StoredProcedures
 			"CREATE TABLE Users ("
 					+"userID    varchar(100) PRIMARY KEY"
 					+" , passHash  varchar(100)"
-					+" , permission    varchar(100))",
+					+" , permission    varchar(100)"
+					+"    CONSTRAINT valid_permission CHECK (permission IN ('ADMIN', 'PROFESSIONAL'))"
+					+")",
 			"CREATE TABLE TimeoutDuration (" + // TODO: REVIEW -TED
 					"duration integer"
 					+ ")"
@@ -291,10 +293,10 @@ public class StoredProcedures
 		return "SELECT * FROM Users";
 	}
 
-	public static String procInsertUser(String userID, String passHash, String permission){
+	public static String procInsertUser(String userID, String passHash, Account.AccessLevel permission) {
 		userID = sanitize(userID);
 		passHash = sanitize(passHash);
-		permission = sanitize(permission);
-		return "INSERT INTO Users(userID, passHash, permission) VALUES('"+userID+"', '"+passHash+"', '"+permission+"')";
+		String perm = sanitize(permission.name());
+		return "INSERT INTO Users(userID, passHash, permission) VALUES('"+userID+"', '"+passHash+"', '"+perm+"')";
 	}
 }

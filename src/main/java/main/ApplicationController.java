@@ -47,7 +47,12 @@ public class ApplicationController extends Application
 			return;
 		}
 
-		ApplicationController.directory = DatabaseWrapper.getInstance().getDirectory();
+		try {
+			ApplicationController.directory = DatabaseWrapper.getInstance().getDirectory();
+		} catch (DatabaseException e) {
+			System.out.println("ERROR LOADING DATABASE:\n" + e.getMessage());
+			return;
+		}
 		ApplicationController.iconController = new IconController(ApplicationController.directory);
 
 		Application.launch(args);

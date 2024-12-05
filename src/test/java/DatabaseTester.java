@@ -64,7 +64,14 @@ public class DatabaseTester
 
 		controller.saveDirectory(oldDirectory);
 
-		Directory newDirectory = controller.getDirectory();
+		Directory newDirectory;
+		try {
+			 newDirectory = controller.getDirectory();
+		}
+		catch (DatabaseException e) {
+			System.out.println("Database failed to load");
+			Assert.fail();
+		}
 
 		/* These tests fail; but I'm too busy to fix them.
 		for (Node n:newDirectory.getNodes()){

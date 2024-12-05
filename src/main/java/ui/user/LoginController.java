@@ -127,10 +127,10 @@ public class LoginController implements Initializable{
 
 		// Safe because the empty string is not a valid password
 		if (thisAccount.getPassword().equals(password)) {
-			switch (thisAccount.getPermissions().toUpperCase()) {
-				case "ADMIN":
+			switch (thisAccount.getPermissions()) {
+				case ADMIN:
 					return LoginStatus.ADMIN;
-				case "PROFESSIONAL":
+				case PROFESSIONAL:
 					return LoginStatus.PROFESSIONAL;
 				default:
 					return LoginStatus.FAILURE;

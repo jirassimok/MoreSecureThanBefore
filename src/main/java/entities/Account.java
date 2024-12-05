@@ -6,7 +6,7 @@ public class Account
 {
 	public String username;
 	public String password;
-	public String permission;
+	public AccessLevel permission;
 
 	public String getUsername() {
 		return username;
@@ -16,7 +16,7 @@ public class Account
 		return password;
 	}
 
-	public String getPermissions() {
+	public AccessLevel getPermissions() {
 		return permission;
 	}
 
@@ -29,14 +29,17 @@ public class Account
 		this.password = password;
 	}
 
-	public void setPermission(String permission) {
+	public void setPermission(AccessLevel permission) {
 		this.permission = permission;
 	}
 
-	Account(String username, String password, String permission){
+	Account(String username, String password, AccessLevel permission){
 		this.username = username;
 		this.password = password;
 		this.permission = permission;
 	}
 
+	public enum AccessLevel {
+		ADMIN, PROFESSIONAL;
+	}
 }

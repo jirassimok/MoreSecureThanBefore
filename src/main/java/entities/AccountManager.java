@@ -1,5 +1,7 @@
 package entities;
 
+import entities.Account.AccessLevel;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +22,7 @@ public class AccountManager {
 		return accounts;
 	}
 
-	String getPermissions(String username) {
+	AccessLevel getPermissions(String username) {
 		return accounts.get(username).getPermissions();
 	}
 
@@ -28,7 +30,7 @@ public class AccountManager {
 		return accounts.get(username);
 	}
 
-	Account addAccount(String user, String password, String permission) {
+	Account addAccount(String user, String password, AccessLevel permission) {
 		Account newAccount = new Account(user, password, permission);
 		accounts.put(user, newAccount);
 		return newAccount;

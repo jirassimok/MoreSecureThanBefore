@@ -1,5 +1,6 @@
 package entities;
 
+import entities.Account.AccessLevel;
 import memento.Caretaker;
 import entities.floor.FloorImage;
 import entities.floor.FloorProxy;
@@ -117,7 +118,7 @@ public class Directory
 		this.professionals.add(professional);
 	}
 
-	public Account addAccount(String user, String password, String permission){
+	public Account addAccount(String user, String password, AccessLevel permission){
 		return this.accountManager.addAccount(user, password, permission);
 	}
 
@@ -146,7 +147,7 @@ public class Directory
 		return this.accountManager.getAccounts();
 	}
 
-	public String getPermissions(String username){
+	public AccessLevel getPermissions(String username){
 		return this.accountManager.getPermissions(username);
 	}
 

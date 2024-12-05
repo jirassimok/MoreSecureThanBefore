@@ -1,6 +1,8 @@
 package ui.admin;
 
 import entities.Account;
+import entities.Account.AccessLevel;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -8,6 +10,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 
 import java.net.URL;
@@ -23,7 +26,7 @@ public class AccountPopupController
 	@FXML private TableView<Account> accountTableView;
 	@FXML private TableColumn<Account, String> usernameCol;
 	@FXML private TableColumn<Account, String> passwordCol;
-	@FXML private TableColumn<Account, String> permissionsCol;
+	@FXML private TableColumn<Account, AccessLevel> permissionsCol;
 	@FXML private Label existsError;
 
 	Account selectedAccount;
@@ -41,12 +44,7 @@ public class AccountPopupController
 
 		Callback<TableColumn<Account, String>, TableCell<Account, String>> cellFactory = p -> new EditingCell();
 
-		permissionsCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Account, String>, ObservableValue<String>>() {
-			@Override
-			public ObservableValue<String> call(TableColumn.CellDataFeatures<Account, String> cdf) {
-				return new SimpleStringProperty(cdf.getValue().getPermissions());
-			}
-		});
+		permissionsCol.setCellValueFactory(cdf -> new SimpleObjectProperty<>(cdf.getValue().getPermissions()));
 
 		passwordCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Account, String>, ObservableValue<String>>() {
 			@Override
@@ -65,7 +63,7 @@ public class AccountPopupController
 //		usernameCol.setCellValueFactory(new PropertyValueFactory<Account, String>("username"));
 		usernameCol.setCellFactory(cellFactory);
 		passwordCol.setCellFactory(cellFactory);
-		permissionsCol.setCellFactory(cellFactory);
+		permissionsCol.setCellFactory(column -> new ComboBoxTableCell<>(AccessLevel.values()));
 
 		//Modifying the firstName property
 		usernameCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Account, String>>() {
@@ -88,13 +86,7 @@ public class AccountPopupController
 			}
 		});
 
-		//Modifying the firstName property
-		permissionsCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Account, String>>() {
-			@Override
-			public void handle(TableColumn.CellEditEvent<Account, String> t) {
-				((Account) t.getTableView().getItems().get(t.getTablePosition().getRow())).setPermission(t.getNewValue());
-			}
-		});
+		permissionsCol.setOnEditCommit(edit -> edit.getRowValue().setPermission(edit.getNewValue()));
 
 		this.accountTableView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Account>() {
 			@Override
@@ -106,7 +98,7 @@ public class AccountPopupController
 
 	@FXML
 	public void onAddAccountBtnClicked(){
-		Account newAccount = getDirectory().addAccount("newuser","newpassword","newpermissions");
+		Account newAccount = getDirectory().addAccount("newuser","newpassword", AccessLevel.PROFESSIONAL);
 		accountTableView.getItems().add(newAccount);
 	}
 
