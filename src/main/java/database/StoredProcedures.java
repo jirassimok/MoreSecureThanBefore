@@ -69,6 +69,10 @@ public class StoredProcedures
 			"DROP TABLE TimeoutDuration"
 	);
 
+	private static final List<String> usersDrops = Arrays.asList(
+			"DROP TABLE Users"
+	);
+
 	//initial data that will be in the database upon construction
 	//breaks things don't run
 	private static final String[] initialData = {
@@ -169,6 +173,10 @@ public class StoredProcedures
 
 	public static List<String> getDirectoryDrops() {
 		return StoredProcedures.directoryDrops;
+	}
+
+	public static List<String> getUsersDrops() {
+		return StoredProcedures.usersDrops;
 	}
 
 	public static String[] getInitialData(){
@@ -276,20 +284,16 @@ public class StoredProcedures
 		}
 	}
 
-	/**
-	 * Modifies the user identified by the given username.
-	 */
-	public static void updateUser(Connection conn, String userID, String password,
+	public static void insertUser(Connection conn, String userID, String password,
 	                              Account.AccessLevel permission)
 			throws SQLException {
-		PreparedStatement stmt = conn.prepareStatement(
-				"UPDATE Users"
-						+ " SET passhash = ?, permission = ?"
-						+ " WHERE userID = ?");
-		stmt.setString(1, password);
-		stmt.setString(2, permission.name());
-		stmt.setString(3, userID);
-		stmt.executeUpdate();
+		try (PreparedStatement stmt = conn.prepareStatement(
+				"INSERT INTO Users (userID, passHash, permission) VALUES (?, ?, ?)")) {
+			stmt.setString(1, userID);
+			stmt.setString(2, password);
+			stmt.setString(3, permission.name());
+			stmt.executeUpdate();
+		}
 	}
 
 	/* **** Retrieval procedures **** */

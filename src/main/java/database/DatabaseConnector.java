@@ -52,7 +52,7 @@ class DatabaseConnector
 			if (! success) {
 				throw new DatabaseException("Failed to initialize database schema");
 			}
-			this.initUsersSchema();
+			this.reInitUsersSchema();
 		}
 	}
 
@@ -151,12 +151,24 @@ class DatabaseConnector
 		return true;
 	}
 
-	private void initUsersSchema() throws DatabaseException {
+	public void reInitUsersSchema() throws DatabaseException {
 		Statement stmt;
 		try {
 			stmt = this.db_connection.createStatement();
 		} catch (SQLException e) {
 			throw new DatabaseException("Failed to create statement", e);
+		}
+
+		for (String dropStatement : StoredProcedures.getUsersDrops()) {
+			//drop the table if it exists
+			try {
+				stmt.executeUpdate(dropStatement);
+			} catch (SQLException e) {
+				// Only throw if the exception wasn't "couldn't drop because table doesn't exist"
+				if (!"42Y55".equals(e.getSQLState())) {
+					throw new DatabaseException("Failed to clear users schema", e);
+				}
+			}
 		}
 
 		for (String table : StoredProcedures.getUsersSchema()) {

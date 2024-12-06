@@ -350,17 +350,24 @@ class DatabaseLoader
 		StoredProcedures.insertTimeoutDuration(db, dir.getTimeout());
 	}
 
+	void destructiveSaveAccounts(AccountManager am) throws DatabaseException {
+		this.dbConn.reInitUsersSchema(); // drop tables, then recreate tables
+		System.out.println("START SAVING ACCOUNTS");
+		this.saveAccounts(am); // insert directory info into tables
+		System.out.println("DONE SAVING ACCOUNTS");
+	}
+
 	/**
 	 * Attempt to save a directory to the database
 	 *
 	 * @throws DatabaseException if any of the insertions trigger a SQLException
 	 */
-	void saveAccounts(AccountManager am) throws DatabaseException {
+	private void saveAccounts(AccountManager am) throws DatabaseException {
 		try {
 			Connection db = db_connection;
 			for (Map.Entry<String, Account> user : am.getAccounts().entrySet()) {
 				Account thisAccount = user.getValue();
-				StoredProcedures.updateUser(db_connection,
+				StoredProcedures.insertUser(db_connection,
 						thisAccount.getUsername(),
 						thisAccount.getPassword(),
 						thisAccount.getPermissions());

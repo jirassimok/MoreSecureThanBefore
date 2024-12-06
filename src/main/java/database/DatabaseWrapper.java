@@ -62,7 +62,7 @@ public class DatabaseWrapper
 	public void saveAccounts(AccountManager accounts) {
 		DatabaseLoader DBL = new DatabaseLoader(DBConn);
 		try {
-			DBL.saveAccounts(accounts);
+			DBL.destructiveSaveAccounts(accounts);
 		} catch (DatabaseException e) {
 			System.err.println("\n\nDATABASE DAMAGED\n\n");
 			e.printStackTrace();
