@@ -45,6 +45,12 @@ class DatabaseLoader
 		return dir;
 	}
 
+	AccountManager getAccountManager() throws DatabaseException {
+		AccountManager am = new AccountManager();
+		this.populateAccountManager(am);
+		return am;
+	}
+
 	/**Populates a given directory with nodes/rooms/professionals
 	 *
 	 *
@@ -60,8 +66,6 @@ class DatabaseLoader
 			this.retrieveNodesAndRooms(directory, rooms);
 			//find all them professionals
 			this.retrieveProfessionals(directory, rooms);
-			//retrieve all user data
-			this.retrieveUserData(directory);
 			kioskID = this.retrieveKiosk();
 			this.retrieveTimeoutDuration(directory);// TODO: REVIEW -TED
 		} catch (SQLException e){
@@ -73,10 +77,19 @@ class DatabaseLoader
 		if (kioskID != null) {
 			directory.setKiosk(rooms.get(kioskID));
 		}
+	}
 
-		if(!directory.getAccounts().values().stream().anyMatch(a->"admin".equals(a.getPermissions()))) {
+	private void populateAccountManager(AccountManager am) throws DatabaseException {
+		try {
+			this.retrieveUserData(am);
+		} catch (SQLException e){
+			e.printStackTrace();
+			throw new DatabaseException("A SQL Exception occurred: " + e.getMessage(), e);
+		}
+
+		if(am.getAccounts().values().stream().noneMatch(a->"admin".equals(a.getPermissions()))) {
 			System.out.println("No admin exists, setting default admin to 'admin' 'password'");
-			directory.addAccount("admin", "password", AccessLevel.ADMIN);
+			am.addAccount("admin", "password", AccessLevel.ADMIN);
 		}
 	}
 
@@ -215,11 +228,11 @@ class DatabaseLoader
 
 	/**Retrieves users and password hashes from the database and populates the given hash maps
 	 *
-	 * @param directory The directory to populate
+	 * @param accounts The account manager to populate
 	 * @throws DatabaseException If a user has invalid permissions.
 	 */
 
-	private void retrieveUserData(Directory directory) throws DatabaseException, SQLException {
+	private void retrieveUserData(AccountManager accounts) throws DatabaseException, SQLException {
 		try {
 			//populate Users
 			Statement queryUsers = this.db_connection.createStatement();
@@ -235,7 +248,7 @@ class DatabaseLoader
 							"User has invalid permissions '%s'; database may be corrupt.",
 							savedPermission));
 				}
-				directory.addAccount(name,
+				accounts.addAccount(name,
 						resultUsers.getString("passHash"),
 						permission);
 			}
@@ -333,16 +346,28 @@ class DatabaseLoader
 			}
 		}
 
-		for (Map.Entry<String, Account> user : dir.getAccounts().entrySet()) {
-			Account thisAccount = user.getValue();
-			StoredProcedures.updateUser(db_connection,
-					thisAccount.getUsername(),
-					thisAccount.getPassword(),
-					thisAccount.getPermissions());
-		}
-
 		// Save timeout duration
 		StoredProcedures.insertTimeoutDuration(db, dir.getTimeout());
+	}
+
+	/**
+	 * Attempt to save a directory to the database
+	 *
+	 * @throws DatabaseException if any of the insertions trigger a SQLException
+	 */
+	void saveAccounts(AccountManager am) throws DatabaseException {
+		try {
+			Connection db = db_connection;
+			for (Map.Entry<String, Account> user : am.getAccounts().entrySet()) {
+				Account thisAccount = user.getValue();
+				StoredProcedures.updateUser(db_connection,
+						thisAccount.getUsername(),
+						thisAccount.getPassword(),
+						thisAccount.getPermissions());
+			}
+		} catch (SQLException e) {
+			throw new DatabaseException("Failed to update database; database may be corrupt: " + e.getMessage(), e);
+		}
 	}
 
 	//A test call to the database

@@ -561,6 +561,7 @@ public class EditorController
 	@FXML
 	public void confirmBtnPressed() {
 		DatabaseWrapper.getInstance().saveDirectory(this.directory);
+		DatabaseWrapper.getInstance().saveAccounts(this.accountManager); // TODO: Move to account editor
 	}
 
 	@FXML

@@ -1,5 +1,6 @@
 package database;
 
+import entities.AccountManager;
 import entities.Directory;
 
 // TODO: Make DBWrapper a singleton
@@ -56,11 +57,34 @@ public class DatabaseWrapper
 	}
 
 	/**
+	 * Save the contents of the given directory as the database
+	 */
+	public void saveAccounts(AccountManager accounts) {
+		DatabaseLoader DBL = new DatabaseLoader(DBConn);
+		try {
+			DBL.saveAccounts(accounts);
+		} catch (DatabaseException e) {
+			System.err.println("\n\nDATABASE DAMAGED\n\n");
+			e.printStackTrace();
+			System.err.println("\n\nDATABASE DAMAGED\n\n");
+		}
+	}
+
+	/**
 	 * Create and populate a directory from the database
 	 *
 	 * @throws DatabaseException If the database could not be loaded.
 	 */
 	public Directory getDirectory() throws DatabaseException {
 		return DBLoader.getDirectory();
+	}
+
+	/**
+	 * Create and populate an AccountManager from the database
+	 *
+	 * @throws DatabaseException If the database could not be loaded.
+	 */
+	public AccountManager getAccountManager() throws DatabaseException {
+		return DBLoader.getAccountManager();
 	}
 }

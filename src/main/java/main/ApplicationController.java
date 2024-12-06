@@ -55,6 +55,7 @@ public class ApplicationController extends Application
 
 		try {
 			ApplicationController.directory = DatabaseWrapper.getInstance().getDirectory();
+			ApplicationController.accountManager = DatabaseWrapper.getInstance().getAccountManager();
 		} catch (DatabaseException e) {
 			System.out.println("ERROR LOADING DATABASE:\n" + e.getMessage());
 			Platform.exit();
