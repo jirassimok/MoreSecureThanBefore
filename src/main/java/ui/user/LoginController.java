@@ -48,20 +48,8 @@ public class LoginController implements Initializable{
 	private AccountManager accountManager = ApplicationController.getAccountManager();
 	private TimeoutTimer timer = TimeoutTimer.getTimeoutTimer();
 	private Timer retryTimer = new Timer();
-
-	// These are fields for reference equality purposes
-	private final EventHandler<WindowEvent> windowHideHandler = event -> {
-		retryTimer.cancel();
-	};
-
-	private final ChangeListener<Window> windowChangeListener = (observable, oldWindow, newWindow) -> {
-		if (newWindow == null) {
-			retryTimer.cancel();
-			oldWindow.removeEventHandler(WindowEvent.WINDOW_HIDDEN, windowHideHandler);
-		} else {
-			newWindow.addEventHandler(WindowEvent.WINDOW_HIDDEN, windowHideHandler);
-		}
-	};
+	// This is a field for reference equality purposes
+	private Runnable timerCancelCallback = retryTimer::cancel;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -83,16 +71,7 @@ public class LoginController implements Initializable{
 		timer.emptyTasks();
 		this.initGlobalFilter();
 		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
-
-		// Throw out the timer when the scene changes or the window closes
-		parentBorderPane.sceneProperty().addListener((observeScene, oldScene, newScene) -> {
-			if (newScene == null) {
-				oldScene.windowProperty().removeListener(windowChangeListener);
-				retryTimer.cancel();
-			} else {
-				newScene.windowProperty().addListener(windowChangeListener);
-			}
-		});
+		ApplicationController.registerCloseCallback(timerCancelCallback);
 	}
 
 	private void lockControls() {
@@ -109,6 +88,20 @@ public class LoginController implements Initializable{
 		passwordField.setEditable(true);
 	}
 
+	/**
+	 * Start a timer that waits before unlocking the controls.
+	 */
+	private void startRetryTimer() {
+		this.retryTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				passwordField.clear();
+				unlockControls();
+				usernameField.selectAll();
+			}
+		}, LOGIN_RETRY_DELAY);
+	}
+
 	@FXML
 	public void loginBtnClicked() throws IOException {
 		this.lockControls();
@@ -116,26 +109,20 @@ public class LoginController implements Initializable{
 		switch (status) {
 			case ADMIN:
 				// directory.logIn(); // Admins start viewing the user screen
+				closeRetryTimer();
 				Parent adminUI = FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml"));
 				errorLbl.getScene().setRoot(adminUI);
 				break;
 			case PROFESSIONAL:
 				accountManager.logIn();
+				closeRetryTimer();
 				Parent destUI = FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml"));
 				errorLbl.getScene().setRoot(destUI);
 				break;
 			default:
 				this.errorLbl.setText("Incorrect Username or Password");
 				this.usernameField.requestFocus();
-				// Wait a second before letting them try again
-				this.retryTimer.schedule(new TimerTask() {
-					@Override
-					public void run() {
-						passwordField.clear();
-						unlockControls();
-						usernameField.selectAll();
-					}
-				}, LOGIN_RETRY_DELAY);
+				this.startRetryTimer();
 		}
 	}
 
@@ -219,9 +206,19 @@ public class LoginController implements Initializable{
 		};
 	}
 
+	/**
+	 * Close the retry timer. After this is called, the timer will no longer work;
+	 * use it only when leaving the page or closing the application.
+	 */
+	private void closeRetryTimer() {
+		timerCancelCallback.run();
+		ApplicationController.deregisterCloseCallback(timerCancelCallback);
+	}
+
 	// place inside controller
 	public void resetState() {
 		parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
 		accountManager.logOut();
+		closeRetryTimer();
 	}
 }
