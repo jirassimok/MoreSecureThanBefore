@@ -1,6 +1,7 @@
 package main;
 
 //import controllers.SMSController;
+import entities.AccountManager;
 import icons.IconController;
 import javafx.application.Application;
 import entities.Directory;
@@ -19,11 +20,16 @@ public class ApplicationController extends Application
 {
 
 	private static Directory directory;
+	private static AccountManager accountManager;
 	private static IconController iconController;
 	private static Stage stage;
 
 	public static Stage getStage() {
 		return ApplicationController.stage;
+	}
+
+	public static AccountManager getAccountManager() {
+		return ApplicationController.accountManager;
 	}
 
 	public static Directory getDirectory() {

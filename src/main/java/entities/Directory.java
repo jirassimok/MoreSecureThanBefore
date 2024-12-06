@@ -1,6 +1,5 @@
 package entities;
 
-import entities.Account.AccessLevel;
 import memento.Caretaker;
 import entities.floor.FloorImage;
 import entities.floor.FloorProxy;
@@ -23,7 +22,6 @@ public class Directory
 	private Set<Node> nodes;
 	private Set<Room> rooms;
 	private Set<Professional> professionals;
-	private AccountManager accountManager;
 	private Room kiosk;
 
 	private long timeout = 50;
@@ -45,7 +43,6 @@ public class Directory
 	public Directory() {
 		this.nodes = new HashSet<>();
 		this.rooms = new HashSet<>();
-		this.accountManager = new AccountManager();
 		this.defaultViews = new HashMap<>();
 		this.professionals = new TreeSet<>(); // these are sorted
 		this.kiosk = null;
@@ -68,11 +65,6 @@ public class Directory
 	public void setDefaultView(double minX, double maxX, double minY, double maxY){
 //		defaultViews.remove(this.floor);
 		defaultViews.put(this.floor.getName()+this.floor.getNumber(), new Viewport( minX, maxX, minY, maxY));
-	}
-
-
-	public boolean isProfessional() {
-		return this.accountManager.isProfessional();
 	}
 
 	/**
@@ -116,43 +108,6 @@ public class Directory
 
 	public void addProfessional(Professional professional) {
 		this.professionals.add(professional);
-	}
-
-	public Account addAccount(String user, String password, AccessLevel permission){
-		return this.accountManager.addAccount(user, password, permission);
-	}
-
-	public void deleteAccount(String user){
-		this.accountManager.deleteAccount(user);
-	}
-
-	public void updateKey(String newName, String oldName){
-		accountManager.updateKey(newName, oldName);
-	}
-
-	/* Account/login functions */
-	public void logIn() {
-		this.accountManager.logIn();
-	}
-
-	public void logOut() {
-		this.accountManager.logOut();
-	}
-
-	public boolean isLoggedIn() {
-		return this.accountManager.isLoggedIn();
-	}
-
-	public Map<String, Account> getAccounts(){
-		return this.accountManager.getAccounts();
-	}
-
-	public AccessLevel getPermissions(String username){
-		return this.accountManager.getPermissions(username);
-	}
-
-	public Account getAccount(String username){
-		return this.accountManager.getAccount(username);
 	}
 
 	/* Element removal methods */
