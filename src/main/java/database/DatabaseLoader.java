@@ -347,10 +347,10 @@ class DatabaseLoader
 
 		for (Map.Entry<String, Account> user : dir.getAccounts().entrySet()) {
 			Account thisAccount = user.getValue();
-			query = StoredProcedures.procInsertUser(thisAccount.getUsername(),
-													thisAccount.getPassword(),
-													thisAccount.getPermissions());
-			db.executeUpdate(query);
+			StoredProcedures.updateUser(db_connection,
+					thisAccount.getUsername(),
+					thisAccount.getPassword(),
+					thisAccount.getPermissions());
 		}
 
 		// Save timeout duration

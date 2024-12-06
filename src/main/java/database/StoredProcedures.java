@@ -1,5 +1,10 @@
 package database;
 
+import entities.Account;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Arrays;
 
@@ -225,6 +230,22 @@ public class StoredProcedures
 		return "INSERT INTO TimeoutDuration (duration) VALUES (" + timeoutDuration + ")";
 	}
 
+	/**
+	 * Modifies the user identified by the given username.
+	 */
+	public static void updateUser(Connection conn, String userID, String password,
+	                              Account.AccessLevel permission)
+			throws SQLException {
+		PreparedStatement stmt = conn.prepareStatement(
+				"UPDATE Users"
+						+ " SET password = ?, permission = ?"
+						+ " WHERE userID = ?");
+		stmt.setString(1, password);
+		stmt.setString(2, permission.name());
+		stmt.setString(3, userID);
+		stmt.executeUpdate();
+	}
+
 	/* **** Retrieval procedures **** */
 
 	public static String procRetrieveNodes(){
@@ -297,12 +318,5 @@ public class StoredProcedures
 
 	public static String procRetrieveUsers(){
 		return "SELECT * FROM Users";
-	}
-
-	public static String procInsertUser(String userID, String passHash, Account.AccessLevel permission) {
-		userID = sanitize(userID);
-		passHash = sanitize(passHash);
-		String perm = sanitize(permission.name());
-		return "INSERT INTO Users(userID, passHash, permission) VALUES('"+userID+"', '"+passHash+"', '"+perm+"')";
 	}
 }
