@@ -1,12 +1,11 @@
 package entities;
 
-import main.ApplicationController;
-
 public class Account
 {
 	private String username;
 	private String password;
 	private AccessLevel permission;
+	private AccountManager manager;
 
 	public String getUsername() {
 		return username;
@@ -21,7 +20,7 @@ public class Account
 	}
 
 	public void setUsername(String newName) {
-		ApplicationController.getAccountManager().updateKey(newName, username);
+		this.manager.updateKey(newName, username);
 		this.username = newName;
 	}
 
@@ -33,10 +32,11 @@ public class Account
 		this.permission = permission;
 	}
 
-	Account(String username, String password, AccessLevel permission){
+	Account(String username, String password, AccessLevel permission, AccountManager manager){
 		this.username = username;
 		this.password = password;
 		this.permission = permission;
+		this.manager = manager;
 	}
 
 	public enum AccessLevel {

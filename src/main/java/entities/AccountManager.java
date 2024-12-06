@@ -46,7 +46,7 @@ public class AccountManager {
 	}
 
 	public Account addAccount(String user, String password, AccessLevel permission) {
-		Account newAccount = new Account(user, password, permission);
+		Account newAccount = new Account(user, password, permission, this);
 		accounts.put(user, newAccount);
 		return newAccount;
 	}
