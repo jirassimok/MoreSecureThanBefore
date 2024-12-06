@@ -38,15 +38,13 @@ public class ApplicationController extends Application
 		return ApplicationController.iconController;
 	}
 
-
-	public static void main(String[] args) {
-
+	@Override
+	public void init() throws Exception {
 		try {
 			DatabaseWrapper.getInstance().init();
 		} catch (DatabaseException e) {
 			System.out.println("ERROR IN DATABASE INITIALIZATION:\n" + e.getMessage());
 			Platform.exit();
-			return;
 		}
 
 		try {
@@ -54,12 +52,12 @@ public class ApplicationController extends Application
 		} catch (DatabaseException e) {
 			System.out.println("ERROR LOADING DATABASE:\n" + e.getMessage());
 			Platform.exit();
-			return;
 		}
 		ApplicationController.iconController = new IconController(ApplicationController.directory);
+	}
 
-		Application.launch(args);
-
+	@Override
+	public void stop() throws Exception {
 		DatabaseWrapper.getInstance().close();
 		TimeoutTimer.getTimeoutTimer().cancelTimer();
 	}
