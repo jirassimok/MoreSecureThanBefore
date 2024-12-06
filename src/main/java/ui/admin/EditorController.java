@@ -546,9 +546,7 @@ public class EditorController
 		addProStage.showAndWait();
 		this.populateTableView();
 		timer.emptyTasks();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 
 	@FXML
@@ -679,9 +677,7 @@ public class EditorController
 		});
 		addProStage.showAndWait();
 		timer.emptyTasks();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 
 
@@ -1348,9 +1344,7 @@ public class EditorController
 				this.populateTableView();
 			}
 		}
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 	@FXML
 	private void loadNodesFile() {
@@ -1376,9 +1370,7 @@ public class EditorController
 				this.redisplayGraph();
 			}
 		}
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 
 	/**
@@ -1451,9 +1443,7 @@ public class EditorController
 		});
 		helpStage.showAndWait();
 		timer.emptyTasks();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 
 }

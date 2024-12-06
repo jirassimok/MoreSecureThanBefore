@@ -585,9 +585,7 @@ public class UserMasterController
 		addAboutStage.setScene(addAboutScene);
 		addAboutStage.showAndWait();
 		timer.emptyTasks();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 
 

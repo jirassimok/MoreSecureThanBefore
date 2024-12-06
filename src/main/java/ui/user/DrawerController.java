@@ -90,9 +90,7 @@ abstract public class DrawerController
 		});
 		userHelpStage.showAndWait();
 		timer.emptyTasks();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 	}
 
 	private void setUpContentAnchorListeners() {

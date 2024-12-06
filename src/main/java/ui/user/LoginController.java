@@ -4,7 +4,6 @@ package ui.user;
 import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.stage.Window;
-import memento.UserState;
 import entities.Account;
 import entities.Directory;
 import javafx.application.Platform;
@@ -81,9 +80,7 @@ public class LoginController implements Initializable{
 
 		timer.emptyTasks();
 		this.initGlobalFilter();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 
 		// Throw out the timer when the scene changes or the window closes
 		parentBorderPane.sceneProperty().addListener((observeScene, oldScene, newScene) -> {
@@ -215,14 +212,14 @@ public class LoginController implements Initializable{
 		return new TimerTask()
 		{
 			public void run() {
-				setState(directory.getCaretaker().getState());
+				resetState();
 			}
 		};
 	}
 
 	// place inside controller
-	public void setState(UserState state) {
-		parentBorderPane.getScene().setRoot(state.getRoot());
+	public void resetState() {
+		parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
 		this.directory.logOut();
 	}
 }

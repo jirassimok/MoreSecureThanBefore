@@ -1,7 +1,6 @@
 package ui;
 
 import icons.IconController;
-import memento.UserState;
 import icons.IconManager;
 import entities.*;
 import entities.floor.FloorImage;
@@ -78,9 +77,7 @@ public abstract class MapDisplayController
 
 		timer.emptyTasks();
 		this.initGlobalFilter();
-		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
-			setState(directory.getCaretaker().getState());
-		});
+		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
 		Platform.runLater(this::initWindowResizeListener);
 		Platform.runLater(this::fitMapSize);
 	}
@@ -256,16 +253,15 @@ public abstract class MapDisplayController
 		return new TimerTask()
 		{
 			public void run() {
-				setState(directory.getCaretaker().getState());
+				resetState();
 			}
 		};
 	}
 
-	// place inside controller
-	protected void setState(UserState state) {
+	protected void resetState() {
 		try {
-			parentBorderPane.getScene().setRoot(state.getRoot());
-			this.directory.logOut();
+			parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
+			directory.logOut();
 		} catch(NullPointerException e) {}
 	}
 }
