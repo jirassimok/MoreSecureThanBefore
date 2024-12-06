@@ -4,9 +4,9 @@ import main.ApplicationController;
 
 public class Account
 {
-	public String username;
-	public String password;
-	public AccessLevel permission;
+	private String username;
+	private String password;
+	private AccessLevel permission;
 
 	public String getUsername() {
 		return username;
