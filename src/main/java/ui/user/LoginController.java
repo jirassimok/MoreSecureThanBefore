@@ -1,6 +1,9 @@
 package ui.user;
 
 
+import javafx.beans.value.ChangeListener;
+import javafx.event.EventHandler;
+import javafx.stage.Window;
 import memento.UserState;
 import entities.Account;
 import entities.Directory;
@@ -18,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 import javafx.scene.input.KeyEvent;
+import javafx.stage.WindowEvent;
 import main.ApplicationController;
 
 import memento.TimeoutTimer;
@@ -26,9 +30,12 @@ import java.io.IOException;
 import java.net.URL;
 
 import java.util.ResourceBundle;
+import java.util.Timer;
 import java.util.TimerTask;
 
 public class LoginController implements Initializable{
+	// TODO: Make this configurable
+	private static final int LOGIN_RETRY_DELAY = 2000;
 
 	@FXML private Label errorLbl;
 	@FXML private Button cancelBtn;
@@ -39,6 +46,21 @@ public class LoginController implements Initializable{
 
 	private Directory directory = ApplicationController.getDirectory();
 	private TimeoutTimer timer = TimeoutTimer.getTimeoutTimer();
+	private Timer retryTimer = new Timer();
+
+	// These are fields for reference equality purposes
+	private final EventHandler<WindowEvent> windowHideHandler = event -> {
+		retryTimer.cancel();
+	};
+
+	private final ChangeListener<Window> windowChangeListener = (observable, oldWindow, newWindow) -> {
+		if (newWindow == null) {
+			retryTimer.cancel();
+			oldWindow.removeEventHandler(WindowEvent.WINDOW_HIDDEN, windowHideHandler);
+		} else {
+			newWindow.addEventHandler(WindowEvent.WINDOW_HIDDEN, windowHideHandler);
+		}
+	};
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -62,11 +84,35 @@ public class LoginController implements Initializable{
 		TimeoutTimer.getTimeoutTimer().registerTask(() -> {
 			setState(directory.getCaretaker().getState());
 		});
+
+		// Throw out the timer when the scene changes or the window closes
+		parentBorderPane.sceneProperty().addListener((observeScene, oldScene, newScene) -> {
+			if (newScene == null) {
+				oldScene.windowProperty().removeListener(windowChangeListener);
+				retryTimer.cancel();
+			} else {
+				newScene.windowProperty().addListener(windowChangeListener);
+			}
+		});
 	}
 
+	private void lockControls() {
+		cancelBtn.setDisable(true);
+		loginBtn.setDisable(true);
+		usernameField.setEditable(false);
+		passwordField.setEditable(false);
+	}
+
+	private void unlockControls() {
+		cancelBtn.setDisable(false);
+		loginBtn.setDisable(false);
+		usernameField.setEditable(true);
+		passwordField.setEditable(true);
+	}
 
 	@FXML
 	public void loginBtnClicked() throws IOException {
+		this.lockControls();
 		LoginStatus status = checkLogin(this.usernameField.getText(), this.passwordField.getText());
 		switch (status) {
 			case ADMIN:
@@ -82,6 +128,15 @@ public class LoginController implements Initializable{
 			default:
 				this.errorLbl.setText("Incorrect Username or Password");
 				this.usernameField.requestFocus();
+				// Wait a second before letting them try again
+				this.retryTimer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						passwordField.clear();
+						unlockControls();
+						usernameField.selectAll();
+					}
+				}, LOGIN_RETRY_DELAY);
 		}
 	}
 
