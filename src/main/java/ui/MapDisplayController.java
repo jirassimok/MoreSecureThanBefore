@@ -261,7 +261,7 @@ public abstract class MapDisplayController
 	protected void resetState() {
 		try {
 			parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
-			directory.logOut();
+			ApplicationController.getAccountManager().logOut();
 		} catch(NullPointerException e) {}
 	}
 }

@@ -1,6 +1,7 @@
 package ui.user;
 
 
+import entities.AccountManager;
 import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.stage.Window;
@@ -44,6 +45,7 @@ public class LoginController implements Initializable{
 	@FXML private BorderPane parentBorderPane;
 
 	private Directory directory = ApplicationController.getDirectory();
+	private AccountManager accountManager = ApplicationController.getAccountManager();
 	private TimeoutTimer timer = TimeoutTimer.getTimeoutTimer();
 	private Timer retryTimer = new Timer();
 
@@ -118,7 +120,7 @@ public class LoginController implements Initializable{
 				errorLbl.getScene().setRoot(adminUI);
 				break;
 			case PROFESSIONAL:
-				directory.logIn();
+				accountManager.logIn();
 				Parent destUI = FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml"));
 				errorLbl.getScene().setRoot(destUI);
 				break;
@@ -172,7 +174,7 @@ public class LoginController implements Initializable{
 	 * @return 2 for admins, 1 for professionals, or 0 for failed logins
 	 */
 	public LoginStatus checkLogin(String username, String password) {
-		Account thisAccount = directory.getAccount(username);
+		Account thisAccount = accountManager.getAccount(username);
 		if(thisAccount == null){
 			return LoginStatus.FAILURE;
 		}
@@ -220,6 +222,6 @@ public class LoginController implements Initializable{
 	// place inside controller
 	public void resetState() {
 		parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
-		this.directory.logOut();
+		accountManager.logOut();
 	}
 }

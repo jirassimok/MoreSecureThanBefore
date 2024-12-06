@@ -16,7 +16,7 @@ import javafx.util.Callback;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import static main.ApplicationController.getDirectory;
+import static main.ApplicationController.getAccountManager;
 
 
 public class AccountPopupController
@@ -40,7 +40,7 @@ public class AccountPopupController
 			}
 		});
 
-		accountTableView.getItems().setAll(getDirectory().getAccounts().values());
+		accountTableView.getItems().setAll(getAccountManager().getAccounts().values());
 
 		Callback<TableColumn<Account, String>, TableCell<Account, String>> cellFactory = p -> new EditingCell();
 
@@ -69,7 +69,7 @@ public class AccountPopupController
 		usernameCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Account, String>>() {
 			@Override
 			public void handle(TableColumn.CellEditEvent<Account, String> t) {
-				if(!getDirectory().getAccounts().values().stream().anyMatch(a->a.getUsername().equals(t.getNewValue()))) {
+				if(!getAccountManager().getAccounts().values().stream().anyMatch(a->a.getUsername().equals(t.getNewValue()))) {
 					existsError.setVisible(false);
 					((Account) t.getTableView().getItems().get(t.getTablePosition().getRow())).setUsername(t.getNewValue());
 				}else{
@@ -98,19 +98,19 @@ public class AccountPopupController
 
 	@FXML
 	public void onAddAccountBtnClicked(){
-		Account newAccount = getDirectory().addAccount("newuser","newpassword", AccessLevel.PROFESSIONAL);
+		Account newAccount = getAccountManager().addAccount("newuser","newpassword", AccessLevel.PROFESSIONAL);
 		accountTableView.getItems().add(newAccount);
 	}
 
 	@FXML
 	public void onRemoveAccountBtnClicked(){
-		getDirectory().deleteAccount(selectedAccount.getUsername());
+		getAccountManager().deleteAccount(selectedAccount.getUsername());
 		accountTableView.getItems().remove(selectedAccount);
 	}
 
 	@FXML
 	public void ondoneBtnClick(){
-		getDirectory().deleteAccount("newuser");
+		getAccountManager().deleteAccount("newuser");
 		doneBtn.getScene().getWindow().hide();
 	}
 
