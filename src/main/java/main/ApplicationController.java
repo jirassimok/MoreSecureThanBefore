@@ -4,6 +4,7 @@ package main;
 import icons.IconController;
 import javafx.application.Application;
 import entities.Directory;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -44,6 +45,7 @@ public class ApplicationController extends Application
 			DatabaseWrapper.getInstance().init();
 		} catch (DatabaseException e) {
 			System.out.println("ERROR IN DATABASE INITIALIZATION:\n" + e.getMessage());
+			Platform.exit();
 			return;
 		}
 
@@ -51,6 +53,7 @@ public class ApplicationController extends Application
 			ApplicationController.directory = DatabaseWrapper.getInstance().getDirectory();
 		} catch (DatabaseException e) {
 			System.out.println("ERROR LOADING DATABASE:\n" + e.getMessage());
+			Platform.exit();
 			return;
 		}
 		ApplicationController.iconController = new IconController(ApplicationController.directory);
