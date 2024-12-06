@@ -8,7 +8,7 @@ public class StoredProcedures
 	//initial schema to setup the database
 	//Define tables here in the order they should be created:
 
-	private static final List<String> schema = Arrays.asList(
+	private static final List<String> directorySchema = Arrays.asList(
 			"CREATE TABLE Nodes ("
 					+ " nodeID integer PRIMARY KEY "
 					+ " , nodeX  double precision NOT NULL "
@@ -40,25 +40,27 @@ public class StoredProcedures
 					+" , employeeID integer references Employees(employeeID) ON DELETE CASCADE"
 					+" , constraint EmployeeRooms_pk PRIMARY KEY (roomID, employeeID))",
 			"CREATE TABLE Kiosk (roomID integer references Rooms(roomID) NOT NULL)",
-			"CREATE TABLE Users ("
-					+"userID    varchar(100) PRIMARY KEY"
-					+" , passHash  varchar(100)"
-					+" , permission    varchar(100)"
-					+"    CONSTRAINT valid_permission CHECK (permission IN ('ADMIN', 'PROFESSIONAL'))"
-					+")",
 			"CREATE TABLE TimeoutDuration (" + // TODO: REVIEW -TED
 					"duration integer"
 					+ ")"
 	);
 
-	private static final List<String> drops = Arrays.asList(
+	private static final List<String> usersSchema = Arrays.asList(
+			"CREATE TABLE Users ("
+					+"userID    varchar(100) PRIMARY KEY"
+					+" , passHash  varchar(100)"
+					+" , permission    varchar(100)"
+					+"    CONSTRAINT valid_permission CHECK (permission IN ('ADMIN', 'PROFESSIONAL'))"
+					+")"
+	);
+
+	private static final List<String> directoryDrops = Arrays.asList(
 			"DROP TABLE Kiosk",
 			"DROP TABLE EmployeeRooms",
 			"DROP TABLE Employees",
 			"DROP TABLE Rooms",
 			"DROP TABLE Edges",
 			"DROP TABLE Nodes",
-			"DROP TABLE Users",
 			"DROP TABLE TimeoutDuration"
 	);
 
@@ -152,12 +154,16 @@ public class StoredProcedures
 	};
 
 
-	public static List<String> getSchema() {
-		return StoredProcedures.schema;
+	public static List<String> getDirectorySchema() {
+		return StoredProcedures.directorySchema;
 	}
 
-	public static List<String> getDrops() {
-		return StoredProcedures.drops;
+	public static List<String> getUsersSchema() {
+		return StoredProcedures.usersSchema;
+	}
+
+	public static List<String> getDirectoryDrops() {
+		return StoredProcedures.directoryDrops;
 	}
 
 	public static String[] getInitialData(){

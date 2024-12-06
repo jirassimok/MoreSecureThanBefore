@@ -261,7 +261,7 @@ class DatabaseLoader
 	// (i.e. copy the db directory, then operate, and remove it if successful)
 	void destructiveSaveDirectory(Directory dir)
 			throws DatabaseException {
-		this.dbConn.reInitSchema(); // drop tables, then recreate tables
+		this.dbConn.reInitDirectorySchema(); // drop tables, then recreate tables
 		System.out.println("START SAVING");
 		try {
 			this.saveDirectory(dir); // insert directory info into tables

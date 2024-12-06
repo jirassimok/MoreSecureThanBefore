@@ -48,10 +48,11 @@ class DatabaseConnector
 		}
 
 		if (warning == null) { //if null, DB does not exist
-			success = this.reInitSchema();
+			success = this.reInitDirectorySchema();
 			if (! success) {
 				throw new DatabaseException("Failed to initialize database schema");
 			}
+			this.initUsersSchema();
 		}
 	}
 
@@ -104,7 +105,7 @@ class DatabaseConnector
 	 * @return true if successful
 	 */
 	// TODO: Refactor so reInitSchema throws SQLException to be handled elsewhere in the class
-	boolean reInitSchema() {
+	boolean reInitDirectorySchema() {
 		boolean result;
 		Statement initSchema = null;
 		try {
@@ -115,7 +116,7 @@ class DatabaseConnector
 			return false;
 		}
 
-		for (String dropStatement : StoredProcedures.getDrops()) {
+		for (String dropStatement : StoredProcedures.getDirectoryDrops()) {
 			//drop the table if it exists
 			try {
 				initSchema.executeUpdate(dropStatement);
@@ -125,7 +126,7 @@ class DatabaseConnector
 			}
 		}
 
-		for (String table : StoredProcedures.getSchema()) {
+		for (String table : StoredProcedures.getDirectorySchema()) {
 			try {
 				initSchema.executeUpdate(table);
 			} catch (SQLException e) {
@@ -148,5 +149,22 @@ class DatabaseConnector
 
 		//stop once we find the first match(assume one create statement per string)
 		return true;
+	}
+
+	private void initUsersSchema() throws DatabaseException {
+		Statement stmt;
+		try {
+			stmt = this.db_connection.createStatement();
+		} catch (SQLException e) {
+			throw new DatabaseException("Failed to create statement", e);
+		}
+
+		for (String table : StoredProcedures.getUsersSchema()) {
+			try {
+				stmt.executeUpdate(table);
+			} catch (SQLException e) {
+				throw new DatabaseException("Failed to initialize users schema", e);
+			}
+		}
 	}
 }
