@@ -33,8 +33,8 @@ class DatabaseConnector
 	 */
 	void init()
 			throws DatabaseException {
-		boolean flag = this.initDB();
-		if (! flag) {
+		boolean success = this.initDB();
+		if (! success) {
 			throw new DatabaseException("Connection failed");
 		}
 
@@ -48,8 +48,8 @@ class DatabaseConnector
 		}
 
 		if (warning == null) { //if null, DB does not exist
-			flag = this.reInitSchema();
-			if (! flag) {
+			success = this.reInitSchema();
+			if (! success) {
 				throw new DatabaseException("Failed to initialize database schema");
 			}
 		}
