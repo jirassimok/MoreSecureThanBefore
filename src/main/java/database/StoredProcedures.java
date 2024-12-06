@@ -180,54 +180,100 @@ public class StoredProcedures
 
 	/* **** Insertion procedures **** */
 
-	public static String procInsertNode(int nodeID, double nodeX, double nodeY, int floor, Integer roomID, String buildingName, boolean isRestricted){
+	public static void insertNode(Connection conn, int nodeID, double nodeX, double nodeY,
+	                                    int floor, Integer roomID, String buildingName, boolean isRestricted)
+			throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement(
+				"INSERT INTO Nodes (nodeID, nodeX, nodeY, floor, isRestricted, roomID, buildingName)"
+						+ " VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+			stmt.setInt(1, nodeID);
+			stmt.setDouble(2, nodeX);
+			stmt.setDouble(3, nodeY);
+			stmt.setInt(4, floor);
+			stmt.setBoolean(5, isRestricted);
+			stmt.setObject(6, roomID);
+			stmt.setString(7, buildingName);
+			stmt.executeUpdate();
+		}
+	}
+
+	public static void insertRoom(Connection conn, int roomID, String roomName, String roomDisplayName,
+	                                    String roomDescription, double labelX, double labelY, String roomType)
+			throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement(
+				"INSERT INTO Rooms (roomName, roomDisplayName, roomDescription, roomID, labelX, labelY, roomType)"
+						+ " VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+			stmt.setString(1, roomName);
+			stmt.setString(2, roomDisplayName);
+			stmt.setString(3, roomDescription);
+			stmt.setInt(4, roomID);
+			stmt.setDouble(5, labelX);
+			stmt.setDouble(6, labelY);
+			stmt.setString(7, roomType);
+			stmt.executeUpdate();
+		}
+	}
+
+	public static void insertRoomWithLocation(Connection conn, int roomID, int nodeID, String roomName, String roomDisplayName,
+	                                                String roomDescription, double labelX, double labelY, String roomType)
+			throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement(
+				"INSERT INTO Rooms (roomName, roomDisplayName, roomDescription, nodeID, roomID, labelX, labelY, roomType)"
+						+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?)")) {
+			stmt.setString(1, roomName);
+			stmt.setString(2, roomDisplayName);
+			stmt.setString(3, roomDescription);
+			stmt.setInt(4, nodeID);
+			stmt.setInt(5, roomID);
+			stmt.setDouble(6, labelX);
+			stmt.setDouble(7, labelY);
+			stmt.setString(8, roomType);
+			stmt.executeUpdate();
+		}
+	}
+
+	public static void insertEdge(Connection conn, int node1, int node2) throws SQLException {
 		//query needs work
-		buildingName = sanitize(buildingName);
-		return "INSERT INTO Nodes (nodeID, nodeX, nodeY, floor, isRestricted, roomID, buildingName) VALUES("+nodeID+", "+nodeX+", "+nodeY+", "+floor+", "+isRestricted+", "+roomID+", '"+buildingName+"')";
+		try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO Edges (node1, node2) VALUES (?, ?)")) {
+			stmt.setInt(1, node1);
+			stmt.setInt(2, node2);
+			stmt.executeUpdate();
+		}
 	}
 
-	public static String procInsertRoom(int roomID, String roomName, String roomDisplayName, String roomDescription, double labelX, double labelY, String roomType){
-		roomName = sanitize(roomName);
-		roomDisplayName = sanitize(roomDisplayName);
-		roomDescription = sanitize(roomDescription);
-		roomType = sanitize(roomType);
-		return "INSERT INTO Rooms (roomName, roomDisplayName, roomDescription, roomID, labelX, labelY, roomType) VALUES('"+roomName
-				+"','"+roomDisplayName+"','"+roomDescription+"',"+roomID+","+ labelX +","+labelY+ ",'"+roomType+"')";
+	public static void insertEmployee(Connection conn, int employeeID, String givenName,
+	                                        String surname, String employeeTitle) throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement(
+				"INSERT INTO Employees(employeeID, employeeGivenName, employeeSurname, employeeTitle)"
+						+ " VALUES (?, ?, ?, ?)")) {
+			stmt.setInt(1, employeeID);
+			stmt.setString(2, givenName);
+			stmt.setString(3, surname);
+			stmt.setString(4, employeeTitle);
+			stmt.executeUpdate();
+		}
 	}
 
-	public static String procInsertRoomWithLocation(int roomID, int nodeID, String roomName, String roomDisplayName, String roomDescription, double labelX, double labelY, String roomType){
-		roomName = sanitize(roomName);
-		roomDescription = sanitize(roomDescription);
-		return "INSERT INTO Rooms (roomName, roomDisplayName, roomDescription, nodeID, roomID, labelX, labelY, roomType) VALUES('"+roomName
-				+"','"+roomDisplayName+"','"+roomDescription+"',"+nodeID+","+roomID+","+ labelX +","+labelY+",'"+roomType+ "')";
+	public static void insertEmployeeRoom(Connection conn, int employeeID, int roomID) throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO EmployeeRooms(employeeID, roomID) VALUES(?, ?)")) {
+			stmt.setInt(1, employeeID);
+			stmt.setInt(2, roomID);
+			stmt.executeUpdate();
+		}
 	}
 
-	public static String procInsertEdge(int node1, int node2){
-		//query needs work
-		return "INSERT INTO Edges (node1, node2) VALUES("+node1+","+node2+")";
+	public static void insertKiosk(Connection conn, int roomID) throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO Kiosk (roomID) VALUES (?)")) {
+			stmt.setInt(1, roomID);
+			stmt.executeUpdate();
+		}
 	}
 
-	public static String procInsertEmployee(int employeeID, String givenName,
-	                                        String surname, String employeeTitle){
-		givenName = sanitize(givenName);
-		surname = sanitize(surname);
-		employeeTitle = sanitize(employeeTitle);
-		return "INSERT INTO Employees(employeeID,employeeGivenName,employeeSurname,employeeTitle) "
-				+ "VALUES("+employeeID+", '"+givenName+"', '"+surname+"', '"+employeeTitle+"')";
-	}
-
-	public static String procInsertEmployeeRoom(int employeeID, int roomID){
-		//query needs work
-		return "INSERT INTO EmployeeRooms(employeeID, roomID) VALUES("+employeeID+","+roomID+")";
-	}
-
-	public static String procInsertKiosk(int roomID){
-		return "INSERT INTO Kiosk (roomID) VALUES (" + roomID + ")";
-	}
-
-	// TODO: REVIEW -TED
-	public static String procInsertTimeoutDuration(long timeoutDuration) {
-		return "INSERT INTO TimeoutDuration (duration) VALUES (" + timeoutDuration + ")";
+	public static void insertTimeoutDuration(Connection conn, long timeoutDuration) throws SQLException {
+		try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO TimeoutDuration (duration) VALUES (?)")) {
+			stmt.setLong(1, timeoutDuration);
+			stmt.executeUpdate();
+		}
 	}
 
 	/**
@@ -238,7 +284,7 @@ public class StoredProcedures
 			throws SQLException {
 		PreparedStatement stmt = conn.prepareStatement(
 				"UPDATE Users"
-						+ " SET password = ?, permission = ?"
+						+ " SET passhash = ?, permission = ?"
 						+ " WHERE userID = ?");
 		stmt.setString(1, password);
 		stmt.setString(2, permission.name());

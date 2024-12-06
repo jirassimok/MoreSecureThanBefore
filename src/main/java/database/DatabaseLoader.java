@@ -278,21 +278,20 @@ class DatabaseLoader
 	 */
 	private void saveDirectory(Directory dir)
 			throws SQLException {
-		Statement db = this.db_connection.createStatement();
-		String query;
+		Connection db = db_connection;
+
 		for (Node n : dir.getNodes()) {
 //			PRINTLN("Saving node "+n.hashCode());
-			query = StoredProcedures.procInsertNode(n.hashCode(), n.getX(), n.getY(),
+			StoredProcedures.insertNode(db, n.hashCode(), n.getX(), n.getY(),
 					n.getFloor(), n.mapToRoom(Object::hashCode),
 					n.getBuildingName(),
 					n.isRestricted());
-			db.executeUpdate(query);
 		}
 
 		for (Room r : dir.getRooms()) {
 //			PRINTLN("Saving node "+r.hashCode())
 			if(r.getLocation() != null) {
-				query = StoredProcedures.procInsertRoomWithLocation(r.hashCode(),
+				StoredProcedures.insertRoomWithLocation(db, r.hashCode(),
 						r.getLocation().hashCode(),
 						r.getName(),
 						r.getDisplayName(),
@@ -301,7 +300,7 @@ class DatabaseLoader
 						r.getLabelOffsetY(),
 						r.getType().name());
 			} else {
-				query = StoredProcedures.procInsertRoom(r.hashCode(),
+				StoredProcedures.insertRoom(db, r.hashCode(),
 						r.getName(),
 						r.getDisplayName(),
 						r.getDescription(),
@@ -309,12 +308,10 @@ class DatabaseLoader
 						r.getLabelOffsetY(),
 						r.getType().name());
 			}
-			db.executeUpdate(query);
 		}
 		/* commented out because, again, kiosks are not yet implemented */
 		if (dir.hasKiosk()) {
-			query = StoredProcedures.procInsertKiosk(dir.getKiosk().hashCode());
-			db.executeUpdate(query);
+			StoredProcedures.insertKiosk(db, dir.getKiosk().hashCode());
 		}
 //		System.out.println("kiosk saved");
 
@@ -322,28 +319,19 @@ class DatabaseLoader
 //			PRINTLN("Saving edges for node "+n.hashCode());
 			for (Node m : dir.getAllNodeNeighbors(n)) {
 //				PRINTLN("Saving edge to "+m.hashCode());
-				query = StoredProcedures.procInsertEdge(n.hashCode(), m.hashCode());
-				db.executeUpdate(query);
+				StoredProcedures.insertEdge(db, n.hashCode(), m.hashCode());
 			}
 		}
 
 		//save professionals
 		for (Professional p : dir.getProfessionals()) {
-			query = StoredProcedures.procInsertEmployee(
+			StoredProcedures.insertEmployee(db,
 					p.hashCode(), p.getGivenName(), p.getSurname(), p.getTitle());
-			db.executeUpdate(query);
 
 			for (Room r : p.getLocations()) {
-				query = StoredProcedures.procInsertEmployeeRoom(p.hashCode(), r.hashCode());
-				db.executeUpdate(query);
+				StoredProcedures.insertEmployeeRoom(db, p.hashCode(), r.hashCode());
 			}
 		}
-
-//		//save user data
-//		for (int i=0;i<dir.getAccounts().toArray().length;i++){
-//			query = StoredProcedures.procInsertUser(dir.getAccounts().toArray()[i].toString(),
-//					dir.getPassHashes().toArray()[i].toString(),
-//					dir.getPermissions().toArray()[i].toString());
 
 		for (Map.Entry<String, Account> user : dir.getAccounts().entrySet()) {
 			Account thisAccount = user.getValue();
@@ -354,10 +342,7 @@ class DatabaseLoader
 		}
 
 		// Save timeout duration
-		query = StoredProcedures.procInsertTimeoutDuration(dir.getTimeout());
-		db.executeUpdate(query);
-
-		db.close();
+		StoredProcedures.insertTimeoutDuration(db, dir.getTimeout());
 	}
 
 	//A test call to the database
