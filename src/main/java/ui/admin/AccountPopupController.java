@@ -65,26 +65,17 @@ public class AccountPopupController
 		passwordCol.setCellFactory(cellFactory);
 		permissionsCol.setCellFactory(column -> new ComboBoxTableCell<>(AccessLevel.values()));
 
-		//Modifying the firstName property
-		usernameCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Account, String>>() {
-			@Override
-			public void handle(TableColumn.CellEditEvent<Account, String> t) {
-				if(!getAccountManager().getAccounts().values().stream().anyMatch(a->a.getUsername().equals(t.getNewValue()))) {
-					existsError.setVisible(false);
-					((Account) t.getTableView().getItems().get(t.getTablePosition().getRow())).setUsername(t.getNewValue());
-				}else{
-					existsError.setVisible(true);
-				}
+		usernameCol.setOnEditCommit(t -> {
+			if(getAccountManager().getAccounts().values().stream()
+					.noneMatch(a -> a != t.getRowValue() && a.getUsername().equals(t.getNewValue()))) {
+				existsError.setVisible(false);
+				t.getRowValue().setUsername(t.getNewValue());
+			}else{
+				existsError.setVisible(true);
 			}
 		});
 
-		//Modifying the firstName property
-		passwordCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Account, String>>() {
-			@Override
-			public void handle(TableColumn.CellEditEvent<Account, String> t) {
-				((Account) t.getTableView().getItems().get(t.getTablePosition().getRow())).setPassword(t.getNewValue());
-			}
-		});
+		passwordCol.setOnEditCommit(t -> t.getRowValue().setPassword(t.getNewValue()));
 
 		permissionsCol.setOnEditCommit(edit -> edit.getRowValue().setPermission(edit.getNewValue()));
 
