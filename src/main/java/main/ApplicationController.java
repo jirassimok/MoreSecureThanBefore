@@ -16,6 +16,11 @@ import database.DatabaseWrapper;
 import database.DatabaseException;
 import memento.TimeoutTimer;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class ApplicationController extends Application
 {
 
@@ -23,6 +28,7 @@ public class ApplicationController extends Application
 	private static AccountManager accountManager;
 	private static IconController iconController;
 	private static Stage stage;
+	private static Set<Runnable> closeCallbacks;
 
 	public static Stage getStage() {
 		return ApplicationController.stage;
@@ -44,8 +50,18 @@ public class ApplicationController extends Application
 		return ApplicationController.iconController;
 	}
 
+	public static boolean registerCloseCallback(Runnable callback) {
+		return closeCallbacks.add(callback);
+	}
+
+	public static boolean deregisterCloseCallback(Runnable callback) {
+		return closeCallbacks.remove(callback);
+	}
+
 	@Override
 	public void init() throws Exception {
+		closeCallbacks = new HashSet<>();
+
 		try {
 			DatabaseWrapper.getInstance().init();
 		} catch (DatabaseException e) {
@@ -67,6 +83,23 @@ public class ApplicationController extends Application
 	public void stop() throws Exception {
 		DatabaseWrapper.getInstance().close();
 		TimeoutTimer.getTimeoutTimer().cancelTimer();
+		List<Exception> exceptions = new ArrayList<>();
+		for (Runnable callback : closeCallbacks) {
+			try {
+				callback.run();
+			} catch (RuntimeException e) {
+				exceptions.add(e);
+			}
+		}
+		if (exceptions.size() == 1) {
+			throw exceptions.get(0);
+		} else if (!exceptions.isEmpty()) {
+			Exception e = new RuntimeException("Multiple exceptions occurred while stopping");
+			for (Exception x : exceptions) {
+				e.addSuppressed(x);
+			}
+			throw e;
+		}
 	}
 
 	/** This is called by JavaFX and starts up the application UI user panel*/
