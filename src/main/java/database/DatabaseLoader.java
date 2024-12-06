@@ -87,7 +87,7 @@ class DatabaseLoader
 			throw new DatabaseException("A SQL Exception occurred: " + e.getMessage(), e);
 		}
 
-		if(am.getAccounts().values().stream().noneMatch(a->"admin".equals(a.getPermissions()))) {
+		if(am.getAccounts().values().stream().noneMatch(a -> Account.AccessLevel.ADMIN == a.getPermissions())) {
 			System.out.println("No admin exists, setting default admin to 'admin' 'password'");
 			am.addAccount("admin", "password", AccessLevel.ADMIN);
 		}
