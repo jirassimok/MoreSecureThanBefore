@@ -28,18 +28,8 @@ public class AccountManager {
 
 	/* **************** Access Modification Methods **************** */
 
-	@Deprecated
-	public void logIn() {
-		this.loggedIn = true;
-	}
-
 	public void logOut() {
 		this.loggedIn = false;
-	}
-
-
-	public Account getAccount(String username) {
-		return accounts.get(username);
 	}
 
 
@@ -63,5 +53,39 @@ public class AccountManager {
 
 	public void deleteAccount(String user) {
 		accounts.remove(user);
+	}
+
+	/**
+	 * Try to log in. If a given username and password form a valid log-in ID,
+	 * set the logged-in state appropriately and return the login type.
+	 *
+	 * @param username        The username to test
+	 * @param password        The password to test
+	 * @return The login result.
+	 */
+	public LoginStatus tryLogin(String username, String password) {
+		Account account = accounts.get(username);
+		if (account == null) {
+			return LoginStatus.FAILURE;
+		}
+
+		// Safe because the empty string is not a valid password
+		if (account.getPassword().equals(password)) {
+			switch (account.getPermissions()) {
+				case ADMIN:
+					return LoginStatus.ADMIN;
+				case PROFESSIONAL:
+					this.loggedIn = true;
+					return LoginStatus.PROFESSIONAL;
+				default:
+					return LoginStatus.FAILURE;
+			}
+		} else {
+			return LoginStatus.FAILURE;
+		}
+	}
+
+	public enum LoginStatus {
+		ADMIN, PROFESSIONAL, FAILURE;
 	}
 }

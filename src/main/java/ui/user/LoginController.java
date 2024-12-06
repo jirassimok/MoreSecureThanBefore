@@ -2,10 +2,6 @@ package ui.user;
 
 
 import entities.AccountManager;
-import javafx.beans.value.ChangeListener;
-import javafx.event.EventHandler;
-import javafx.stage.Window;
-import entities.Account;
 import entities.Directory;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -21,7 +17,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 import javafx.scene.input.KeyEvent;
-import javafx.stage.WindowEvent;
 import main.ApplicationController;
 
 import memento.TimeoutTimer;
@@ -105,14 +100,12 @@ public class LoginController implements Initializable{
 	@FXML
 	public void loginBtnClicked() throws IOException {
 		this.lockControls();
-		LoginStatus status = checkLogin(this.usernameField.getText(), this.passwordField.getText());
-		switch (status) {
+		switch (accountManager.tryLogin(this.usernameField.getText(), this.passwordField.getText())) {
 			case ADMIN:
 				// directory.logIn(); // Admins start viewing the user screen
 				changeScene(FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml")));
 				break;
 			case PROFESSIONAL:
-				accountManager.logIn();
 				changeScene(FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml")));
 				break;
 			default:
@@ -145,40 +138,6 @@ public class LoginController implements Initializable{
 	public void cancelBtnClicked() throws IOException {
 		Parent destUI = (BorderPane) FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml"));
 		errorLbl.getScene().setRoot(destUI);
-	}
-
-
-
-	/**
-	 * Check if a given username and password form a valid log-in ID
-	 *
-	 * @param username The username to test
-	 * @param password The password to test
-	 * @return 2 for admins, 1 for professionals, or 0 for failed logins
-	 */
-	public LoginStatus checkLogin(String username, String password) {
-		Account thisAccount = accountManager.getAccount(username);
-		if(thisAccount == null){
-			return LoginStatus.FAILURE;
-		}
-
-		// Safe because the empty string is not a valid password
-		if (thisAccount.getPassword().equals(password)) {
-			switch (thisAccount.getPermissions()) {
-				case ADMIN:
-					return LoginStatus.ADMIN;
-				case PROFESSIONAL:
-					return LoginStatus.PROFESSIONAL;
-				default:
-					return LoginStatus.FAILURE;
-			}
-		} else {
-			return LoginStatus.FAILURE;
-		}
-	}
-
-	public enum LoginStatus {
-		ADMIN, PROFESSIONAL, FAILURE;
 	}
 
 	/**
