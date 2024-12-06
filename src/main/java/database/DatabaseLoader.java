@@ -78,11 +78,6 @@ class DatabaseLoader
 			System.out.println("No admin exists, setting default admin to 'admin' 'password'");
 			directory.addAccount("admin", "password", AccessLevel.ADMIN);
 		}
-
-		if(!directory.getAccounts().values().stream().anyMatch(a->"professional".equals(a.getPermissions()))) {
-			System.out.println("No professional exists, setting default professional to 'professional' 'password'");
-			directory.addAccount("professional", "password", AccessLevel.PROFESSIONAL);
-		}
 	}
 
 	/** This method is not in use because we are not using kiosks at the moment */
