@@ -109,15 +109,11 @@ public class LoginController implements Initializable{
 		switch (status) {
 			case ADMIN:
 				// directory.logIn(); // Admins start viewing the user screen
-				closeRetryTimer();
-				Parent adminUI = FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml"));
-				errorLbl.getScene().setRoot(adminUI);
+				changeScene(FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml")));
 				break;
 			case PROFESSIONAL:
 				accountManager.logIn();
-				closeRetryTimer();
-				Parent destUI = FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml"));
-				errorLbl.getScene().setRoot(destUI);
+				changeScene(FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml")));
 				break;
 			default:
 				this.errorLbl.setText("Incorrect Username or Password");
@@ -197,15 +193,6 @@ public class LoginController implements Initializable{
 		});
 	}
 
-	protected TimerTask getTimerTask() {
-		return new TimerTask()
-		{
-			public void run() {
-				resetState();
-			}
-		};
-	}
-
 	/**
 	 * Close the retry timer. After this is called, the timer will no longer work;
 	 * use it only when leaving the page or closing the application.
@@ -215,10 +202,15 @@ public class LoginController implements Initializable{
 		ApplicationController.deregisterCloseCallback(timerCancelCallback);
 	}
 
+	public void changeScene(Parent newRoot) {
+		closeRetryTimer();
+		parentBorderPane.getScene().setRoot(newRoot);
+	}
+
 	// place inside controller
 	public void resetState() {
-		parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
 		accountManager.logOut();
 		closeRetryTimer();
+		parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
 	}
 }
