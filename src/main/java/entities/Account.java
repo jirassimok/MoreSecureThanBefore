@@ -21,7 +21,7 @@ public class Account
 	}
 
 	public void setUsername(String newName) {
-		ApplicationController.getDirectory().updateKey(newName, username);
+		ApplicationController.getAccountManager().updateKey(newName, username);
 		this.username = newName;
 	}
 

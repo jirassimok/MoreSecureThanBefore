@@ -1,8 +1,11 @@
 package icons;
 
+import entities.AccountManager;
 import entities.Directory;
 import entities.Node;
 import entities.Room;
+
+import java.util.function.BooleanSupplier;
 
 
 // TODO: Move to entities; complete integration with Room
@@ -15,6 +18,7 @@ import entities.Room;
 public class IconController
 {
 	private Directory directory;
+	private BooleanSupplier canViewRestricted;
 
 	// Keeping state here is not ideal, but simpliflies usage immensely
 	private Room startRoom;
@@ -23,10 +27,15 @@ public class IconController
 	/**
 	 * Create a color controller for the given directory
 	 */
-	public IconController(Directory dir) {
+	public IconController(Directory dir, AccountManager accountManager) {
 		this.directory = dir;
+		this.canViewRestricted = accountManager::canViewRestricted;
 		this.startRoom = null;
 		this.endRoom = null;
+	}
+
+	private boolean canViewRestricted() {
+		return canViewRestricted.getAsBoolean();
 	}
 
 
@@ -45,10 +54,10 @@ public class IconController
 	private void resetNode(Node node) {
 		if (node == null) return;
 
-		boolean isElevator = directory.getNodeNeighbors(node).stream()
+		boolean isElevator = directory.getNodeNeighbors(node, canViewRestricted()).stream()
 				.anyMatch(n -> (node.getFloor() != n.getFloor()));
 
-		boolean isPortal = directory.getNodeNeighbors(node).stream()
+		boolean isPortal = directory.getNodeNeighbors(node, canViewRestricted()).stream()
 				.anyMatch(n -> (!node.getBuildingName().equalsIgnoreCase(n.getBuildingName())));
 
 		if (node.isRestricted()) {

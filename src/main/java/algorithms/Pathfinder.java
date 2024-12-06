@@ -51,7 +51,8 @@ public class Pathfinder
 	 *
 	 * @return A list of nodes representing the path
 	 */
-	public static List<Node> findPath(Node a, Node b) throws PathNotFoundException {
-		return Pathfinder.strategy.findPath(a, b, ApplicationController.getDirectory()::getNodeNeighbors);
+	public static List<Node> findPath(Node a, Node b, boolean canUseRestricted) throws PathNotFoundException {
+		return Pathfinder.strategy.findPath(a, b,
+				node -> ApplicationController.getDirectory().getNodeNeighbors(node, canUseRestricted));
 	}
 }

@@ -27,7 +27,7 @@ public class BreadthFirstTester
 		if (alg == null) Assert.fail("BFS not found");
 		Pathfinder.setStrategy(alg);
 		try {
-			path = Pathfinder.findPath(n1, n2);
+			path = Pathfinder.findPath(n1, n2, false);
 		} catch (PathNotFoundException e) {
 			Assert.fail("Path not found, but expected");
 		}

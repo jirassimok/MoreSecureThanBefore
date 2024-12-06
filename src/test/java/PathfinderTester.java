@@ -29,7 +29,7 @@ public class PathfinderTester
 		if (alg == null) Assert.fail("BFS not found");
 		Pathfinder.setStrategy(alg);
 		try {
-			 path = Pathfinder.findPath(n1, n2);
+			 path = Pathfinder.findPath(n1, n2, true);
 		} catch (PathNotFoundException e) {
 			Assert.fail("Path not found, but expected");
 		}
@@ -92,7 +92,7 @@ public class PathfinderTester
 		dir.connectNodes(origin, n3);
 
 		List<Node> shortestDist = new ArrayList<>(); //The empty list
-		Assert.assertEquals(Pathfinder.findPath(origin, dest), shortestDist);
+		Assert.assertEquals(Pathfinder.findPath(origin, dest, false), shortestDist);
 	}
 
 	// 	n[9] -> n[13]: 9, 10, 11, 12, 5, 6, 15, 13
@@ -200,12 +200,12 @@ public class PathfinderTester
   0          O
 
  */
-		Node origin = dir.addNewRoomNode(0.0, 0.0, FloorProxy.getFloor("BUILDING1", 1), "E", "E", "E"); //Create a start node
-		Node dest = dir.addNewRoomNode(10.0, 10.0, FloorProxy.getFloor("BUILDING1", 2), "E", "E", "E"); //Create a end node
-		Node n1 = dir.addNewRoomNode(2.0, 2.0, FloorProxy.getFloor("BUILDING1", 1), "E", "E", "E"); //Node between origin and elev1
-		Node n2 = dir.addNewRoomNode(2.0, 2.0, FloorProxy.getFloor("BUILDING1", 2), "E", "E", "E"); //Node between elev2 and dest
-		Node elev1 = dir.addNewRoomNode(5.0, 5.0, FloorProxy.getFloor("BUILDING1", 1), "E", "E", "E");
-		Node elev2 = dir.addNewRoomNode(5.0, 5.0, FloorProxy.getFloor("BUILDING1", 2), "E", "E", "E");
+		Node origin = dir.addNewRoomNode(0.0, 0.0, FloorProxy.getFloor("BUILDING1", 1), "E", "E", "E", false); //Create a start node
+		Node dest = dir.addNewRoomNode(10.0, 10.0, FloorProxy.getFloor("BUILDING1", 2), "E", "E", "E", false); //Create a end node
+		Node n1 = dir.addNewRoomNode(2.0, 2.0, FloorProxy.getFloor("BUILDING1", 1), "E", "E", "E", false); //Node between origin and elev1
+		Node n2 = dir.addNewRoomNode(2.0, 2.0, FloorProxy.getFloor("BUILDING1", 2), "E", "E", "E", false); //Node between elev2 and dest
+		Node elev1 = dir.addNewRoomNode(5.0, 5.0, FloorProxy.getFloor("BUILDING1", 1), "E", "E", "E", false);
+		Node elev2 = dir.addNewRoomNode(5.0, 5.0, FloorProxy.getFloor("BUILDING1", 2), "E", "E", "E", false);
 
 		//Connect nodes on same floor
 		dir.connectNodes(origin, n1);

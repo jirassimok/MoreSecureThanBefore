@@ -40,6 +40,7 @@ public abstract class MapDisplayController
 	@FXML protected ImageView imageViewMap;
 	@FXML protected ScrollPane mapScroll;
 	protected Directory directory;
+	protected AccountManager accountManager;
 	protected IconController iconController;
 
 	// Primary is left click and secondary is right click
@@ -65,6 +66,7 @@ public abstract class MapDisplayController
 
 	protected void initialize() {
 		this.directory = ApplicationController.getDirectory();
+		this.accountManager = ApplicationController.getAccountManager();
 		this.iconController = ApplicationController.getIconController();
 
 		this.changeFloor(this.directory.getFloor());

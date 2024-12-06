@@ -92,7 +92,7 @@ public class Floor implements FloorImage
 	 */
 	public Image display() {
 		Image ret;
-		if(ApplicationController.getDirectory().isProfessional()) {
+		if(ApplicationController.getAccountManager().isProfessional()) {
 			ret = new Image(path.professionalImage, true); // backgroound loading prevents crashing sometimes
 		}else{
 			ret = new Image(path.vistorImage, true); // backgroound loading prevents crashing sometimes

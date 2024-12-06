@@ -31,6 +31,7 @@ import entities.Room;
 import javafx.stage.Stage;
 import algorithms.PathNotFoundException;
 import algorithms.Pathfinder;
+import main.ApplicationController;
 
 // TODO: Put directions in a scroll box
 // TODO: Generally improve text directions (see below)
@@ -428,7 +429,8 @@ public class UserPathController
 	 */
 	private List<Node> getPathOrAlert(Room startRoom, Room endRoom) {
 		try {
-			return Pathfinder.findPath(startRoom.getLocation(), endRoom.getLocation());
+			return Pathfinder.findPath(startRoom.getLocation(), endRoom.getLocation(),
+					ApplicationController.getAccountManager().canViewRestricted());
 		} catch (PathNotFoundException e) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("No Path Found");
@@ -447,7 +449,8 @@ public class UserPathController
 	}
 
 	private void displayRooms() {
-		this.nodePane.getChildren().setAll(iconManager.getSavedIcons(directory.getRoomsOnFloor()));
+		this.nodePane.getChildren().setAll(iconManager.getSavedIcons(
+				directory.getRoomsOnFloor(ApplicationController.getAccountManager().canViewRestricted())));
 	}
 
 

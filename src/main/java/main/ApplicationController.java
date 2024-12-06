@@ -59,7 +59,7 @@ public class ApplicationController extends Application
 			System.out.println("ERROR LOADING DATABASE:\n" + e.getMessage());
 			Platform.exit();
 		}
-		ApplicationController.iconController = new IconController(ApplicationController.directory);
+		ApplicationController.iconController = new IconController(directory, accountManager);
 	}
 
 	@Override

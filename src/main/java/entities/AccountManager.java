@@ -44,6 +44,12 @@ public class AccountManager {
 		return loggedIn;
 	}
 
+	// Maybe this should be a static method on ApplicationController,
+	// if I'm not separating Session into its own class.
+	public boolean canViewRestricted() {
+		return loggedIn;
+	}
+
 	@Deprecated
 	public void logIn() {
 		this.loggedIn = true;

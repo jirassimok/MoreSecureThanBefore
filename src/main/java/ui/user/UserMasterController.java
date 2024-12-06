@@ -152,7 +152,7 @@ public class UserMasterController
 	}
 
 	private void initImages() {
-		if (directory.isProfessional()) {
+		if (accountManager.isProfessional()) {
 			logAsAdmin.setImage(new Image("/logout.png"));
 		} else {
 			logAsAdmin.setImage(new Image("/lock.png"));
@@ -216,7 +216,7 @@ public class UserMasterController
 			this.resetRoomSearchResults();
 		} else {
 			String search = searchString.toLowerCase();
-			Set<Room> rooms = directory.getUserRooms();
+			Set<Room> rooms = directory.getUserRooms(accountManager.canViewRestricted());
 			rooms.removeIf(room -> ! room.getName().toLowerCase().contains(search));
 			this.roomSearchResults.setItems(FXCollections.observableArrayList(rooms));
 		}
@@ -351,7 +351,7 @@ public class UserMasterController
 					}
 
 					Set<Room> rooms = selection.getLocations();
-					rooms.removeIf(r -> (! directory.isLoggedIn()) && r.getLocation().isRestricted());
+					rooms.removeIf(r -> (!accountManager.canViewRestricted()) && r.getLocation().isRestricted());
 					if (rooms.isEmpty()) {
 						//no rooms for this professional
 						Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -382,8 +382,8 @@ public class UserMasterController
 	@FXML
 	public void logAsAdminClicked()
 			throws IOException, InvocationTargetException {
-		if(directory.isProfessional()){
-			directory.logOut();
+		if(accountManager.isProfessional()){
+			accountManager.logOut();
 			changeFloor(directory.getFloor());
 			logAsAdmin.setImage(new Image("/lock.png"));
 		}else{
@@ -406,14 +406,14 @@ public class UserMasterController
 	 * Display all rooms on the current floor of the current building
 	 */
 	private void displayRooms() {
-		this.nodePane.getChildren().setAll(iconManager.getIcons(directory.getRoomsOnFloor()));
+		this.nodePane.getChildren().setAll(iconManager.getIcons(directory.getRoomsOnFloor(accountManager.canViewRestricted())));
 	}
 
 	/**
 	 * Reset the list of rooms
 	 */
 	private void resetRoomSearchResults() {
-		Set<Room> rooms = directory.getUserRooms();
+		Set<Room> rooms = directory.getUserRooms(accountManager.canViewRestricted());
 		rooms.removeIf(r -> r.getLocation() == null);
 		this.roomSearchResults.getSelectionModel().clearSelection();
 		this.roomSearchResults.setItems(FXCollections.observableArrayList(rooms));
@@ -596,13 +596,14 @@ public class UserMasterController
 	private void findService(RoomType service)
 			throws IOException, InvocationTargetException {
 		try {
-			Set<Room> services = this.directory.getUserRooms();
+			Set<Room> services = this.directory.getUserRooms(accountManager.canViewRestricted());
 			services.removeIf(room -> room.getType() != service);
 
 			int prevCost = 0;
 			Room nearest = null;
 			for (Room r : services) {
-				List<Node> nodes = Pathfinder.findPath(startRoom.getLocation(), r.getLocation());
+				List<Node> nodes = Pathfinder.findPath(startRoom.getLocation(), r.getLocation(),
+						accountManager.canViewRestricted());
 				if (prevCost == 0) {
 					prevCost = nodes.size();
 					nearest = r;
