@@ -34,7 +34,7 @@ public class ApplicationController extends Application
 		ApplicationController.directory = newDirectory;
 	}
 
-		public static IconController getIconController() {
+	public static IconController getIconController() {
 		return ApplicationController.iconController;
 	}
 
