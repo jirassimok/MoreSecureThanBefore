@@ -12,33 +12,8 @@ public class AccountManager {
 	private Map<String, Account> accounts = new HashMap<>();
 	private boolean loggedIn;
 
-	public void updateKey(String newName, String oldName) {
-		Account tempAccount = accounts.get(oldName);
-		accounts.remove(oldName);
-		accounts.put(newName, tempAccount);
-	}
 
-	public Map<String, Account> getAccounts() {
-		return accounts;
-	}
-
-	public AccessLevel getPermissions(String username) {
-		return accounts.get(username).getPermissions();
-	}
-
-	public Account getAccount(String username) {
-		return accounts.get(username);
-	}
-
-	public Account addAccount(String user, String password, AccessLevel permission) {
-		Account newAccount = new Account(user, password, permission);
-		accounts.put(user, newAccount);
-		return newAccount;
-	}
-
-	public void deleteAccount(String user) {
-		accounts.remove(user);
-	}
+ 	/* **************** Account Checking Methods **************** */
 
 	public boolean isProfessional() {
 		return loggedIn;
@@ -50,6 +25,9 @@ public class AccountManager {
 		return loggedIn;
 	}
 
+
+	/* **************** Access Modification Methods **************** */
+
 	@Deprecated
 	public void logIn() {
 		this.loggedIn = true;
@@ -59,8 +37,31 @@ public class AccountManager {
 		this.loggedIn = false;
 	}
 
-	@Deprecated
-	public boolean isLoggedIn() {
-		return this.loggedIn;
+
+	public Account getAccount(String username) {
+		return accounts.get(username);
+	}
+
+
+	/* **************** Account Editing Methods **************** */
+
+	public void updateKey(String newName, String oldName) {
+		Account tempAccount = accounts.get(oldName);
+		accounts.remove(oldName);
+		accounts.put(newName, tempAccount);
+	}
+
+	public Map<String, Account> getAccounts() {
+		return accounts;
+	}
+
+	public Account addAccount(String user, String password, AccessLevel permission) {
+		Account newAccount = new Account(user, password, permission);
+		accounts.put(user, newAccount);
+		return newAccount;
+	}
+
+	public void deleteAccount(String user) {
+		accounts.remove(user);
 	}
 }
