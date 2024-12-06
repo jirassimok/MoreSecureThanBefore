@@ -54,7 +54,6 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 import filereader.FileParser;
-import main.ApplicationController;
 import ui.MapDisplayController;
 import memento.TimeoutTimer;
 import algorithms.Pathfinder;
@@ -99,6 +98,9 @@ public class EditorController
 	@FXML private TextField timeoutField;
 	@FXML public JFXComboBox<RoomType> roomTypeComboBox;
 //	@FXML private JFXToggleButton setDefaultViewBtn;
+
+	/** Whether restricted rooms are currently visible */
+	private boolean restricted;
 
 	/**
 	 * Class implemented for use in multiple selection
@@ -150,7 +152,7 @@ public class EditorController
 	public void initialize(URL location, ResourceBundle resources) {
 		super.initialize();
 
-		directory.logOut(); // default to user view
+		restricted = false;
 
 		initfloorComboBox();
 
@@ -485,7 +487,7 @@ public class EditorController
 
 	@FXML
 	private void logoutBtnClicked() {
-		directory.logOut();
+		restricted = false;
 		if (! directory.roomsAreConnected()) {
 			Alert warn = new Alert(Alert.AlertType.CONFIRMATION, "Not all rooms are connected: some paths will not exist.");
 
@@ -647,9 +649,9 @@ public class EditorController
 	@FXML
 	public void restrictedViewBtnClicked(){
 		if (restrictedView.selectedProperty().getValue()) {
-			directory.logIn();
+			restricted = true;
 		} else {
-			directory.logOut();
+			restricted = false;
 		}
 		this.changeFloor(directory.getFloor());
 	}
@@ -709,7 +711,7 @@ public class EditorController
 			this.displayRooms();
 			this.linePane.getChildren().clear();
 		} else {
-			this.displayNodes(directory.getNodesOnFloor(this.directory.getFloor()));
+			this.displayNodes(directory.getNodesOnFloor(this.directory.getFloor(), restricted));
 			this.redrawLines();
 		}
 	}
@@ -732,8 +734,8 @@ public class EditorController
 	 */
 	public void redrawLines() {
 		Set<Line> lines = new HashSet<>();
-		for (Node node : directory.getNodesOnFloor(directory.getFloor())) {
-			for (Node neighbor : directory.getNodeNeighbors(node)) {
+		for (Node node : directory.getNodesOnFloor(directory.getFloor(), restricted)) {
+			for (Node neighbor : directory.getNodeNeighbors(node, restricted)) {
 				if ((node.getFloor() == neighbor.getFloor()) &&
 						node.getBuildingName().equalsIgnoreCase(neighbor.getBuildingName())) {
 					lines.add(new Line(node.getX(), node.getY(), neighbor.getX(), neighbor.getY()));
@@ -810,7 +812,7 @@ public class EditorController
 	 * This function should _only_ add a node and room, and do nothing else
 	 */
 	private Node addNodeRoom(double x, double y, String name, String displayName, String description, RoomType type) {
-		Node newNode = directory.addNewRoomNode(x, y, directory.getFloor(), name, displayName, description, type);
+		Node newNode = directory.addNewRoomNode(x, y, directory.getFloor(), name, displayName, description, type, restricted);
 		this.addNodeListeners(newNode);
 		this.redisplayGraph();
 		this.selectedNodes.forEach(n -> {
@@ -828,7 +830,7 @@ public class EditorController
 		if(x < 0 || y < 0) {
 			return null;
 		}
-		Node newNode = this.directory.addNewNode(x, y, this.directory.getFloor());
+		Node newNode = this.directory.addNewNode(x, y, this.directory.getFloor(), restricted);
 		this.addNodeListeners(newNode);
 		return newNode;
 	}
@@ -1061,7 +1063,7 @@ public class EditorController
 					botRightY = this.selectionStartY;
 				}
 				// Loop through and select/deselect all nodes in the bounds
-				this.directory.getNodesOnFloor(this.directory.getFloor()).forEach(n -> {
+				this.directory.getNodesOnFloor(this.directory.getFloor(), restricted).forEach(n -> {
 					if(n.getX() > topLeftX && n.getX() < botRightX && n.getY() > topLeftY && n.getY() < botRightY) {
 						this.selectNode(n);
 					}
@@ -1136,7 +1138,7 @@ public class EditorController
 			}
 			// control click to select neighbors instead of target node
 			if (e.isControlDown()) {
-				directory.getNodeNeighbors(node).forEach(this::selectNode);
+				directory.getNodeNeighbors(node, restricted).forEach(this::selectNode);
 			}
 
 			this.selectOrDeselectNode(node);
@@ -1185,12 +1187,12 @@ public class EditorController
 		Room room;
 		switch(contextSelection) {
 			case UP: // make into bathroom
-				directory.addNewElevatorUp(n);
+				directory.addNewElevatorUp(n, restricted);
 				directory.getNodes().forEach(this::addNodeListeners);
 				iconController.resetAllNodes();
 				break;
 			case DOWN:
-				directory.addNewElevatorDown(n);
+				directory.addNewElevatorDown(n, restricted);
 				directory.getNodes().forEach(this::addNodeListeners);
 				iconController.resetAllNodes();
 				break;
@@ -1245,7 +1247,7 @@ public class EditorController
 
 
 	private void selectAllNodesOnFloor() {
-		this.directory.getNodesOnFloor(directory.getFloor()).forEach(node -> {
+		this.directory.getNodesOnFloor(directory.getFloor(), restricted).forEach(node -> {
 			if (!this.selectedNodes.contains(node)) {
 				this.selectedNodes.add(node);
 				this.iconController.selectAnotherNode(node);
@@ -1359,7 +1361,7 @@ public class EditorController
 			File f = fc.showOpenDialog(this.contentAnchor.getScene().getWindow());
 			if (f != null) {
 				try {
-					FileParser.parseNodes(f, directory);
+					FileParser.parseNodes(f, directory, restricted);
 				} catch (FileNotFoundException e) {
 					Alert a = new Alert(Alert.AlertType.ERROR, "Unable to read file");
 					a.showAndWait();
@@ -1397,8 +1399,8 @@ public class EditorController
 	 * Show the rooms with editable labels to the admin
 	 */
 	public void displayRooms() {
-		this.nodePane.getChildren().setAll(iconManager.getIcons(directory.getRoomsOnFloor()));
-		for (Icon icon : iconManager.getIcons(directory.getRoomsOnFloor())) {
+		this.nodePane.getChildren().setAll(iconManager.getIcons(directory.getRoomsOnFloor(restricted)));
+		for (Icon icon : iconManager.getIcons(directory.getRoomsOnFloor(restricted))) {
 			icon.getTransforms().clear();
 			Label label = icon.getLabel();
 			label.setOnMouseClicked(event -> {

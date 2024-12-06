@@ -146,7 +146,7 @@ public class Directory
 
 	/**
 	 * Create a Room and an associated Node in this directory
-	 *
+	 * <p>
 	 * The new room and node are created and associated with each other, and are added
 	 * to this directory.
 	 *
@@ -154,17 +154,18 @@ public class Directory
 	 * @param y The y-coordinate of the new room.
 	 * @param name The name of the new room.
 	 * @param desc A description of the new room.
+	 * @param isRestricted Whether the room is only visible to logged-in users.
 	 *
 	 * @return The new node.
 	 */
-	public Node addNewRoomNode(double x, double y, FloorImage floor, String name, String shortName, String desc, RoomType type) {
-		Node newNode = this.addNewRoomNode(x, y, floor, name, shortName, desc);
+	public Node addNewRoomNode(double x, double y, FloorImage floor, String name, String shortName, String desc, RoomType type, boolean isRestricted) {
+		Node newNode = this.addNewRoomNode(x, y, floor, name, shortName, desc, isRestricted);
 		newNode.getRoom().setType(type);
 		return newNode;
 	}
-	public Node addNewRoomNode(double x, double y, FloorImage floor, String name, String shortName, String desc) {
+	public Node addNewRoomNode(double x, double y, FloorImage floor, String name, String shortName, String desc, boolean isRestricted) {
 		Room newRoom = new Room(name, shortName, desc);
-		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), this.accountManager.isLoggedIn());
+		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), isRestricted);
 		newRoom.setLocation(newNode);
 		newNode.setRoom(newRoom);
 		this.nodes.add(newNode);
@@ -217,16 +218,9 @@ public class Directory
 	/**
 	 * Create a new node in this directory
 	 */
-	public Node addNewNode(double x, double y, FloorImage floor) {
+	public Node addNewNode(double x, double y, FloorImage floor, boolean isRestricted) {
 		if (floor == null) throw new RuntimeException("Tried to create node with null floor");
-		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), this.accountManager.isLoggedIn());
-		this.nodes.add(newNode);
-		return newNode;
-	}
-
-	//use this only for DB loading from CSV
-	public Node addNewNode(double x, double y, int floor, String buildingName) {
-		Node newNode = new Node(x, y, floor, buildingName, this.accountManager.isLoggedIn());
+		Node newNode = new Node(x, y, floor.getNumber(), floor.getName(), isRestricted);
 		this.nodes.add(newNode);
 		return newNode;
 	}
@@ -237,9 +231,9 @@ public class Directory
 		return newNode;
 	}
 
-	@Deprecated
+	@Deprecated // Use in testing only
 	public Node addNewNode(double x, double y, int floor) {
-		return this.addNewNode(x, y, floor, "NO BUILDING");
+		return this.addNewNode(x, y, floor, "NO BUILDING", false);
 	}
 
 	/* Filtered getters */
@@ -247,15 +241,16 @@ public class Directory
 	 * Get a set of the nodes on the given floor
 	 *
 	 * @param floor The floor number to get noes for.
+	 * @param includeRestricted Whether to include nodes that should be visible only to logged-in users.
 	 *
 	 * @return A set of the nodes in this directory on the given floor.
 	 */
-	public Set<Node> getNodesOnFloor(FloorImage floor) {
+	public Set<Node> getNodesOnFloor(FloorImage floor, boolean includeRestricted) {
 		return this.filterNodes(node ->
 				(node.getFloor() == floor.getNumber())
 						&&
 				node.getBuildingName().equalsIgnoreCase(floor.getName())
-						&& (! node.isRestricted() || this.accountManager.isLoggedIn()));
+						&& (! node.isRestricted() || includeRestricted));
 	}
 
 	/**
@@ -263,24 +258,24 @@ public class Directory
 	 *
 	 * A room's floor is determined by its associated node
 	 *
-	 * @note Only this function, getUserRooms, and getNodeNeighbors filter by permissions.
+	 * @param includeRestricted Whether to include nodes that should be visible only to logged-in users.
 	 */
-	public Set<Room> getRoomsOnFloor() {
+	public Set<Room> getRoomsOnFloor(boolean includeRestricted) {
 		return this.filterRooms(room -> (room.getLocation() != null)
 				&& (room.getLocation().getFloor() == this.floor.getNumber())
 				&& room.getLocation().getBuildingName().equalsIgnoreCase(this.floor.getName())
-				&& (! room.getLocation().isRestricted() || this.accountManager.isLoggedIn()));
+				&& (! room.getLocation().isRestricted() || includeRestricted));
 	}
 
 	/**
 	 * Get all rooms accessible by the current user
 	 *
-	 * @note Only this function, getRoomsOnFloor and getNodeNeighbors natively filter by permissions
+	 * @param includeRestricted Whether to include nodes that should be visible only to logged-in users.
 	 */
-	public Set<Room> getUserRooms() {
+	public Set<Room> getUserRooms(boolean includeRestricted) {
 		return this.filterRooms(room -> (room.getLocation() != null)
 				&& (!room.getLocation().isRestricted()
-				    || this.isLoggedIn()));
+				    || includeRestricted));
 	}
 
 	/**
@@ -379,19 +374,19 @@ public class Directory
 		room.removeProfessional(professional);
 	}
 
-	public void addNewElevatorUp(Node node) {
+	public void addNewElevatorUp(Node node, boolean isRestricted) {
 		if (node == null) return;
 
-		this.addNewElevatorUp(node, this.floor.getNumber()+1);
+		this.addNewElevatorUp(node, this.floor.getNumber()+1, isRestricted);
 	}
 
-	public void addNewElevatorDown(Node node) {
+	public void addNewElevatorDown(Node node, boolean isRestricted) {
 		if (node == null) return;
 
-		this.addNewElevatorDown(node, this.floor.getNumber()-1);
+		this.addNewElevatorDown(node, this.floor.getNumber()-1, isRestricted);
 	}
 
-	private void addNewElevatorUp(Node node, int floorNum) {
+	private void addNewElevatorUp(Node node, int floorNum, boolean isRestricted) {
 		FloorImage targetFloor = FloorProxy.getFloor(this.getFloorName(), floorNum);
 		if (targetFloor == null) return;
 
@@ -399,7 +394,7 @@ public class Directory
 		neighbors.removeIf(n -> n.getFloor() != floorNum);
 
 		if (! neighbors.isEmpty()) {
-			neighbors.forEach(n -> this.addNewElevatorUp(n, floorNum+1));
+			neighbors.forEach(n -> this.addNewElevatorUp(n, floorNum+1, isRestricted));
 		} else {
 			if (node.getRoom() == null) {
 				this.addNewRoomToNode(node, "", "", "Elevator to floor above");
@@ -407,20 +402,20 @@ public class Directory
 			node.getRoom().setType(RoomType.ELEVATOR);
 
 			Node n = this.addNewRoomNode(node.getX(), node.getY(), targetFloor, "",
-					"", "Elevator to floor below", RoomType.ELEVATOR);
+					"", "Elevator to floor below", RoomType.ELEVATOR, isRestricted);
 			n.getRoom().setType(RoomType.ELEVATOR);
 			this.connectNodes(node, n);
 		}
 	}
 
-	private void addNewElevatorDown(Node node, int floorNum) {
+	private void addNewElevatorDown(Node node, int floorNum, boolean isRestricted) {
 		FloorImage targetFloor = FloorProxy.getFloor(this.getFloorName(), floorNum);
 		if (targetFloor == null) return;
 
 		Set<Node> neighbors = node.getNeighbors();
 		neighbors.removeIf(n -> n.getFloor() != floorNum);
 		if (! neighbors.isEmpty()) {
-			neighbors.forEach(n -> this.addNewElevatorDown(n, floorNum-1));
+			neighbors.forEach(n -> this.addNewElevatorDown(n, floorNum-1, isRestricted));
 		} else {
 			if (node.getRoom() == null) {
 				this.addNewRoomToNode(node, "", "", "Elevator to floor below");
@@ -428,7 +423,7 @@ public class Directory
 			node.getRoom().setType(RoomType.ELEVATOR);
 
 			Node n = this.addNewRoomNode(node.getX(), node.getY(), targetFloor, "",
-					"", "Elevator to floor above", RoomType.ELEVATOR);
+					"", "Elevator to floor above", RoomType.ELEVATOR, isRestricted);
 			n.getRoom().setType(RoomType.ELEVATOR);
 			this.connectNodes(node, n);
 		}
@@ -440,11 +435,12 @@ public class Directory
 	 * Gets the login-aware neighbors of the given node
 	 *
 	 * @param node The node to get neighbors for
+	 * @param includeRestricted Whether to include nodes that should be visible only to logged-in users.
 	 * @return The currently-available neighbors of the node
 	 */
-	public Set<Node> getNodeNeighbors(Node node) {
+	public Set<Node> getNodeNeighbors(Node node, boolean includeRestricted) {
 		Set<Node> neighbors = this.getAllNodeNeighbors(node);
-		if (! this.accountManager.isLoggedIn()) {
+		if (! includeRestricted) {
 			neighbors.removeIf(Node::isRestricted);
 		}
 		return neighbors;

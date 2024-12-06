@@ -57,6 +57,7 @@ public class NodeCSVParser
 	private Directory dir = null;
 	private FileReader fr;
 	private BufferedReader br;
+	private boolean createRestrictedNodes;
 
 	/**
 	 * Make a new parser
@@ -64,9 +65,10 @@ public class NodeCSVParser
 	 * @param file The file to read data from
 	 * @param directory The directory to add the parsed data to
 	 */
-	public NodeCSVParser(File file, Directory directory) {
+	public NodeCSVParser(File file, Directory directory, boolean createRestrictedNodes) {
 		this.file = file;
 		this.dir = directory;
+		this.createRestrictedNodes = createRestrictedNodes;
 	}
 
 	/**
@@ -123,12 +125,14 @@ public class NodeCSVParser
 				if(match.group("type").equals("Node")) {
 					System.out.println("Node");
 					dir.addNewNode(Double.valueOf(match.group("x")), Double.valueOf(match.group("y")),
-							Integer.valueOf(match.group("floor")), match.group("buildingname"));
+							Integer.valueOf(match.group("floor")), match.group("buildingname"),
+							createRestrictedNodes);
 				} else if (match.group("type").equals("Room")){
 					System.out.println("Room");
 					dir.addNewRoomNode(Double.valueOf(match.group("x")), Double.valueOf(match.group("y")),
-									   FloorProxy.getFloor(match.group("buildingname"), Integer.valueOf(match.group("floor"))),
-									   match.group("name"), match.group("sname"), match.group("desc"));
+							FloorProxy.getFloor(match.group("buildingname"), Integer.valueOf(match.group("floor"))),
+							match.group("name"), match.group("sname"), match.group("desc"),
+							createRestrictedNodes);
 				} else{
 					//ya done fucked up
 					throw new IOException();

@@ -24,9 +24,9 @@ public class FileParser
 	 *
 	 * See {@link NodeCSVParser} for details.
 	 */
-	public static void parseNodes(File file, Directory directory)
+	public static void parseNodes(File file, Directory directory, boolean createRestrictedNodes)
 			throws FileNotFoundException{
-		NodeCSVParser reader = new NodeCSVParser(file, directory);
+		NodeCSVParser reader = new NodeCSVParser(file, directory, createRestrictedNodes);
 		reader.open();
 		reader.parseToDirectory();
 		reader.close();
