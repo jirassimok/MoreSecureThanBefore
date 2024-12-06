@@ -33,12 +33,8 @@ public class AccountPopupController
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		this.accountTableView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Account>() {
-			@Override
-			public void changed(ObservableValue<? extends Account> observable, Account oldValue, Account newValue) {
-//				accountTableView = newValue;
-			}
-		});
+		this.accountTableView.getSelectionModel().selectedItemProperty()
+				.addListener((observable, oldValue, newValue) -> {});
 
 		accountTableView.getItems().setAll(getAccountManager().getAccounts().values());
 
@@ -46,21 +42,10 @@ public class AccountPopupController
 
 		permissionsCol.setCellValueFactory(cdf -> new SimpleObjectProperty<>(cdf.getValue().getPermissions()));
 
-		passwordCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Account, String>, ObservableValue<String>>() {
-			@Override
-			public ObservableValue<String> call(TableColumn.CellDataFeatures<Account, String> cdf) {
-				return new SimpleStringProperty("*****");
-			}
-		});
+		passwordCol.setCellValueFactory(cdf -> new SimpleStringProperty("*****"));
 
-		usernameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Account, String>, ObservableValue<String>>() {
-			@Override
-			public ObservableValue<String> call(TableColumn.CellDataFeatures<Account, String> cdf) {
-				return new SimpleStringProperty(cdf.getValue().getUsername());
-			}
-		});
+		usernameCol.setCellValueFactory(cdf -> new SimpleStringProperty(cdf.getValue().getUsername()));
 
-//		usernameCol.setCellValueFactory(new PropertyValueFactory<Account, String>("username"));
 		usernameCol.setCellFactory(cellFactory);
 		passwordCol.setCellFactory(cellFactory);
 		permissionsCol.setCellFactory(column -> new ComboBoxTableCell<>(AccessLevel.values()));
@@ -79,12 +64,8 @@ public class AccountPopupController
 
 		permissionsCol.setOnEditCommit(edit -> edit.getRowValue().setPermission(edit.getNewValue()));
 
-		this.accountTableView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Account>() {
-			@Override
-			public void changed(ObservableValue<? extends Account> observable, Account oldValue, Account newValue) {
-				selectedAccount = newValue;
-			}
-		});
+		this.accountTableView.getSelectionModel().selectedItemProperty()
+				.addListener((observable, oldValue, newValue) -> selectedAccount = newValue);
 	}
 
 	@FXML
