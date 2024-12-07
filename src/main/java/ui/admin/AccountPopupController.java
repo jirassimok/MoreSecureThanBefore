@@ -2,11 +2,9 @@ package ui.admin;
 
 import entities.Account;
 import entities.Account.AccessLevel;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -14,6 +12,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static main.ApplicationController.getAccountManager;
@@ -22,12 +21,15 @@ import static main.ApplicationController.getAccountManager;
 public class AccountPopupController
 		implements Initializable
 {
+	private static final int MIN_PASSWORD_LENGTH = 8;
+	private static final String NEW_USER_NAME = "newuser";
+
 	@FXML private Button doneBtn;
 	@FXML private TableView<Account> accountTableView;
 	@FXML private TableColumn<Account, String> usernameCol;
 	@FXML private TableColumn<Account, String> passwordCol;
 	@FXML private TableColumn<Account, AccessLevel> permissionsCol;
-	@FXML private Label existsError;
+	@FXML private Label errorField;
 
 	Account selectedAccount;
 
@@ -47,20 +49,29 @@ public class AccountPopupController
 		usernameCol.setCellValueFactory(cdf -> new SimpleStringProperty(cdf.getValue().getUsername()));
 
 		usernameCol.setCellFactory(cellFactory);
-		passwordCol.setCellFactory(cellFactory);
+		passwordCol.setCellFactory(column -> new PasswordCell());
 		permissionsCol.setCellFactory(column -> new ComboBoxTableCell<>(AccessLevel.values()));
 
 		usernameCol.setOnEditCommit(t -> {
 			if(getAccountManager().getAccounts().values().stream()
 					.noneMatch(a -> a != t.getRowValue() && a.getUsername().equals(t.getNewValue()))) {
-				existsError.setVisible(false);
+				hideError("Username already taken");
 				t.getRowValue().setUsername(t.getNewValue());
 			}else{
-				existsError.setVisible(true);
+				displayError("Username already taken");
 			}
 		});
 
-		passwordCol.setOnEditCommit(t -> t.getRowValue().setPassword(t.getNewValue()));
+		passwordCol.setOnEditCommit(event -> {
+			String errMsg = String.format("Password must be at least %s characters", MIN_PASSWORD_LENGTH);
+			String password = event.getNewValue();
+			if (password.length() >= MIN_PASSWORD_LENGTH) {
+				hideError(errMsg);
+				event.getRowValue().setPassword(password);
+			} else {
+				displayError(errMsg);
+			}
+		});
 
 		permissionsCol.setOnEditCommit(edit -> edit.getRowValue().setPermission(edit.getNewValue()));
 
@@ -68,10 +79,44 @@ public class AccountPopupController
 				.addListener((observable, oldValue, newValue) -> selectedAccount = newValue);
 	}
 
+	/**
+	 * Display an error about passwords. Limit the length of the message,
+	 * as the display field has fixed width.
+	 */
+	private void displayError(String message) {
+		errorField.setText(message);
+		errorField.setVisible(true);
+	}
+
+	private void hideError() {
+		errorField.setVisible(false);
+	}
+
+	private void hideError(String message) {
+		if (message.equals(errorField.getText())) {
+			errorField.setVisible(false);
+		}
+	}
+
 	@FXML
 	public void onAddAccountBtnClicked(){
-		Account newAccount = getAccountManager().addAccount("newuser","newpassword", AccessLevel.PROFESSIONAL);
-		accountTableView.getItems().add(newAccount);
+		List<Account> items = accountTableView.getItems();
+		int index;
+		if (getAccountManager().getAccounts().containsKey(NEW_USER_NAME)) {
+			Account newAccount = getAccountManager().getAccounts().get(NEW_USER_NAME);
+			index = items.indexOf(newAccount);
+			displayError("Rename the last new user first.");
+		} else {
+			Account newAccount = getAccountManager().addAccount(NEW_USER_NAME, "newpasswword", AccessLevel.PROFESSIONAL);
+			displayError("User created; please change name and password.");
+			items.add(newAccount);
+			index = items.size() - 1;
+		}
+		Platform.runLater(() -> {
+			accountTableView.getSelectionModel().select(index);
+			accountTableView.getFocusModel().focus(index);
+			accountTableView.scrollTo(index);
+		});
 	}
 
 	@FXML
@@ -82,8 +127,7 @@ public class AccountPopupController
 
 	@FXML
 	public void ondoneBtnClick(){
-		getAccountManager().deleteAccount("newuser");
+		getAccountManager().deleteAccount(NEW_USER_NAME);
 		doneBtn.getScene().getWindow().hide();
 	}
-
 }
