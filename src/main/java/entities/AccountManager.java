@@ -4,6 +4,7 @@ import hashing.HashProtocol;
 import entities.Account.AccessLevel;
 import hashing.PasswordHasher;
 
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,8 @@ public class AccountManager {
 		return newAccount;
 	}
 
-	public Account addNewAccount(String user, AccessLevel permission, char[] password) {
+	public Account addNewAccount(String user, AccessLevel permission, char[] password)
+			throws GeneralSecurityException {
 		Account newAccount = new Account(this, user, permission, password);
 		accounts.put(user, newAccount);
 		return newAccount;
@@ -81,11 +83,18 @@ public class AccountManager {
 		if (account == null) {
 			// Hash the password anyway so the user can't see why we failed
 			// (improves timing similarity and clears the password array).
-			hashPassword(password, DUMMY_SALT);
+			try {
+				hashPassword(password, DUMMY_SALT);
+			} catch (GeneralSecurityException e) {}
 			return LoginStatus.FAILURE;
 		}
 
-		String passHash = hashPassword(account.getPasswordProtocol(), password, account.getSalt());
+		String passHash;
+		try {
+			passHash = hashPassword(account.getPasswordProtocol(), password, account.getSalt());
+		} catch (GeneralSecurityException e) {
+			return LoginStatus.FAILURE;
+		}
 
 		// Safe because the empty string is not a valid password
 		if (account.getPassHash().equals(passHash)) {

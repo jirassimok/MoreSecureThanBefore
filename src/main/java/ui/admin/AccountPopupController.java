@@ -12,6 +12,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -68,8 +69,15 @@ public class AccountPopupController
 			char[] password = event.getNewValue();
 			if (password.length >= MIN_PASSWORD_LENGTH) {
 				hideError(errMsg);
-				event.getRowValue().changePassword(password);
-				Arrays.fill(password, '-');
+				try {
+					event.getRowValue().changePassword(password);
+				} catch (GeneralSecurityException e) {
+					e.printStackTrace();
+					displayError("Error processing password change; see logs for details.");
+					return;
+				} finally {
+					Arrays.fill(password, '-');
+				}
 			} else {
 				Arrays.fill(password, '-');
 				displayError(errMsg);
@@ -110,9 +118,16 @@ public class AccountPopupController
 			index = items.indexOf(newAccount);
 			displayError("Rename the last new user first.");
 		} else {
-			Account newAccount = getAccountManager().addNewAccount(
-					"newuser", AccessLevel.PROFESSIONAL, "newpassword".toCharArray());
-			displayError("User created; please change name and password.");
+			Account newAccount;
+			try {
+				newAccount = getAccountManager().addNewAccount(
+						"newuser", AccessLevel.PROFESSIONAL, "newpassword".toCharArray());
+				displayError("User created; please change name and password.");
+			} catch (GeneralSecurityException e) {
+				e.printStackTrace();
+				displayError("Error creating account; see logs for details.");
+				return;
+			}
 			items.add(newAccount);
 			index = items.size() - 1;
 		}

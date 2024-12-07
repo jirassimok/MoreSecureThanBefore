@@ -1,5 +1,6 @@
 package database;
 
+import java.security.GeneralSecurityException;
 import java.sql.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -91,7 +92,11 @@ class DatabaseLoader
 
 		if(am.getAccounts().values().stream().noneMatch(a -> Account.AccessLevel.ADMIN == a.getPermissions())) {
 			System.out.println("No admin exists, setting default admin to 'admin' 'password'");
-			am.addNewAccount("admin", AccessLevel.ADMIN, "password".toCharArray());
+			try {
+				am.addNewAccount("admin", AccessLevel.ADMIN, "password".toCharArray());
+			} catch (GeneralSecurityException e) {
+				System.out.println("Unable to create admin account: " + e.getMessage());
+			}
 		}
 	}
 

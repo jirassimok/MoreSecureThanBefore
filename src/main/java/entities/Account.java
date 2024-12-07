@@ -3,6 +3,8 @@ package entities;
 import hashing.HashProtocol;
 import hashing.PasswordHasher;
 
+import java.security.GeneralSecurityException;
+
 public class Account
 {
 	private AccountManager manager;
@@ -46,7 +48,7 @@ public class Account
 
 	/* **** Password Access **** */
 
-	public void changePassword(char[] newPassword) {
+	public void changePassword(char[] newPassword) throws GeneralSecurityException {
 		String salt = PasswordHasher.generateSalt();
 		this.passHash = PasswordHasher.hashPassword(newPassword, salt);
 		this.passwordProtocol = PasswordHasher.DEFAULT_PROTOCOL;
@@ -68,7 +70,8 @@ public class Account
 	 *
 	 * <p>Clears the password array.
 	 */
-	Account(AccountManager manager, String username, AccessLevel permission, char[] password) {
+	Account(AccountManager manager, String username, AccessLevel permission, char[] password)
+			throws GeneralSecurityException {
 		this.manager = manager;
 		this.username = username;
 		this.permission = permission;
