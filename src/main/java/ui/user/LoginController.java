@@ -100,7 +100,7 @@ public class LoginController implements Initializable{
 	@FXML
 	public void loginBtnClicked() throws IOException {
 		this.lockControls();
-		switch (accountManager.tryLogin(this.usernameField.getText(), this.passwordField.getText().toCharArray())) {
+		switch (accountManager.tryLogin(this.usernameField.getText(), getPasswordAsArray())) {
 			case ADMIN:
 				// directory.logIn(); // Admins start viewing the user screen
 				changeScene(FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml")));
@@ -113,6 +113,44 @@ public class LoginController implements Initializable{
 				this.usernameField.requestFocus();
 				this.startRetryTimer();
 		}
+	}
+
+	/**
+	 * Get the password from the PasswordField as a char[], trying not to make
+	 * it into a string.
+	 */
+	private char[] getPasswordAsArray() {
+		CharSequence content = passwordField.getCharacters();
+		char[] password = new char[content.length()];
+
+		// OpenJFX stores TextField/PasswordField data in a StringBuilder, and OpenJDK's
+		// StringBuilder stores its contents in a char[]. So we can use that to access the
+		// char array almost directly.
+		if (content instanceof StringBuilder) {
+			StringBuilder buffer = (StringBuilder) content;
+
+			// Copy the StringBuilder's internal data into our own array.
+			buffer.getChars(0, buffer.length(), password, 0);
+
+			// Blank the StringBuilder's internal buffer by overwriting it with .replace
+			// and a string of null bytes.
+			buffer.replace(0, buffer.length(), new String(new char[buffer.length()]));
+			// If we use buffer.delete here, the TextField will get confused and crash
+			// when we clear it below.
+		} else {
+			// If we didn't get a StringBuilder, we're not using the OpenJFX PasswordField,
+			// and we don't know what's inside 'content', but we can copy the data byte by
+			// byte from it and hope that it's using an array internally and that it's
+			// cleared along with the password field.
+			//
+			// To do better than this, we'd probably need to reimplement TextField from
+			// scratch ourselves.
+			for (int i = 0; i < password.length; ++i) {
+				password[i] = content.charAt(i);
+			}
+		}
+		passwordField.clear();
+		return password;
 	}
 
 	@FXML

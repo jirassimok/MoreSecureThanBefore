@@ -12,6 +12,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -27,7 +28,7 @@ public class AccountPopupController
 	@FXML private Button doneBtn;
 	@FXML private TableView<Account> accountTableView;
 	@FXML private TableColumn<Account, String> usernameCol;
-	@FXML private TableColumn<Account, String> passwordCol;
+	@FXML private TableColumn<Account, char[]> passwordCol;
 	@FXML private TableColumn<Account, AccessLevel> permissionsCol;
 	@FXML private Label errorField;
 
@@ -44,7 +45,7 @@ public class AccountPopupController
 
 		permissionsCol.setCellValueFactory(cdf -> new SimpleObjectProperty<>(cdf.getValue().getPermissions()));
 
-		passwordCol.setCellValueFactory(cdf -> new SimpleStringProperty("*****"));
+		passwordCol.setCellValueFactory(cdf -> new SimpleObjectProperty<>(new char[0]));
 
 		usernameCol.setCellValueFactory(cdf -> new SimpleStringProperty(cdf.getValue().getUsername()));
 
@@ -64,11 +65,13 @@ public class AccountPopupController
 
 		passwordCol.setOnEditCommit(event -> {
 			String errMsg = String.format("Password must be at least %s characters", MIN_PASSWORD_LENGTH);
-			String password = event.getNewValue();
-			if (password.length() >= MIN_PASSWORD_LENGTH) {
+			char[] password = event.getNewValue();
+			if (password.length >= MIN_PASSWORD_LENGTH) {
 				hideError(errMsg);
-				event.getRowValue().changePassword(password.toCharArray());
+				event.getRowValue().changePassword(password);
+				Arrays.fill(password, '-');
 			} else {
+				Arrays.fill(password, '-');
 				displayError(errMsg);
 			}
 		});
