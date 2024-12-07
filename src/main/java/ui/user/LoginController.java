@@ -100,7 +100,7 @@ public class LoginController implements Initializable{
 	@FXML
 	public void loginBtnClicked() throws IOException {
 		this.lockControls();
-		switch (accountManager.tryLogin(this.usernameField.getText(), this.passwordField.getText())) {
+		switch (accountManager.tryLogin(this.usernameField.getText(), this.passwordField.getText().toCharArray())) {
 			case ADMIN:
 				// directory.logIn(); // Admins start viewing the user screen
 				changeScene(FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml")));

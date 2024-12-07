@@ -67,7 +67,7 @@ public class AccountPopupController
 			String password = event.getNewValue();
 			if (password.length() >= MIN_PASSWORD_LENGTH) {
 				hideError(errMsg);
-				event.getRowValue().setPassword(password);
+				event.getRowValue().changePassword(password.toCharArray());
 			} else {
 				displayError(errMsg);
 			}
@@ -107,7 +107,8 @@ public class AccountPopupController
 			index = items.indexOf(newAccount);
 			displayError("Rename the last new user first.");
 		} else {
-			Account newAccount = getAccountManager().addAccount(NEW_USER_NAME, "newpasswword", AccessLevel.PROFESSIONAL);
+			Account newAccount = getAccountManager().addNewAccount(
+					"newuser", AccessLevel.PROFESSIONAL, "newpassword".toCharArray());
 			displayError("User created; please change name and password.");
 			items.add(newAccount);
 			index = items.size() - 1;

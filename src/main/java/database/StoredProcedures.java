@@ -1,5 +1,6 @@
 package database;
 
+import hashing.HashProtocol;
 import entities.Account;
 
 import java.sql.Connection;
@@ -53,9 +54,11 @@ public class StoredProcedures
 	private static final List<String> usersSchema = Arrays.asList(
 			"CREATE TABLE Users ("
 					+"userID    varchar(100) PRIMARY KEY"
-					+" , passHash  varchar(100)"
 					+" , permission    varchar(100)"
 					+"    CONSTRAINT valid_permission CHECK (permission IN ('ADMIN', 'PROFESSIONAL'))"
+					+" , passHash  varchar(1000) NOT NULL"
+					+" , salt varchar(1000) NOT NULL"
+					+ ", hashProtocol varchar(100) NOT NULL"
 					+")"
 	);
 
@@ -284,14 +287,17 @@ public class StoredProcedures
 		}
 	}
 
-	public static void insertUser(Connection conn, String userID, String password,
-	                              Account.AccessLevel permission)
+	public static void insertUser(Connection conn, String userID, Account.AccessLevel permission,
+	                              String passHash, String salt, HashProtocol protocol)
 			throws SQLException {
 		try (PreparedStatement stmt = conn.prepareStatement(
-				"INSERT INTO Users (userID, passHash, permission) VALUES (?, ?, ?)")) {
+				"INSERT INTO Users (userID, permission, hashProtocol, passHash, salt)"
+						+ " VALUES (?, ?, ?, ?, ?)")) {
 			stmt.setString(1, userID);
-			stmt.setString(2, password);
-			stmt.setString(3, permission.name());
+			stmt.setString(2, permission.name());
+			stmt.setString(3, protocol.name());
+			stmt.setString(4, passHash);
+			stmt.setString(5, salt);
 			stmt.executeUpdate();
 		}
 	}

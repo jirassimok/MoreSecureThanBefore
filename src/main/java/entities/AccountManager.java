@@ -1,9 +1,13 @@
 package entities;
 
+import hashing.HashProtocol;
 import entities.Account.AccessLevel;
+import hashing.PasswordHasher;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static hashing.PasswordHasher.hashPassword;
 
 /**
  * In-memory account storage, comparable to {@link Directory}.
@@ -11,6 +15,8 @@ import java.util.Map;
 public class AccountManager {
 	private Map<String, Account> accounts = new HashMap<>();
 	private boolean loggedIn;
+
+	private static final String DUMMY_SALT = PasswordHasher.generateSalt();
 
 
  	/* **************** Account Checking Methods **************** */
@@ -45,8 +51,15 @@ public class AccountManager {
 		return accounts;
 	}
 
-	public Account addAccount(String user, String password, AccessLevel permission) {
-		Account newAccount = new Account(user, password, permission, this);
+	public Account loadAccount(String user, AccessLevel permission,
+	                           HashProtocol protocol, String passHash, String salt) {
+		Account newAccount = new Account(this, user, permission, protocol, passHash, salt);
+		accounts.put(user, newAccount);
+		return newAccount;
+	}
+
+	public Account addNewAccount(String user, AccessLevel permission, char[] password) {
+		Account newAccount = new Account(this, user, permission, password);
 		accounts.put(user, newAccount);
 		return newAccount;
 	}
@@ -63,14 +76,19 @@ public class AccountManager {
 	 * @param password        The password to test
 	 * @return The login result.
 	 */
-	public LoginStatus tryLogin(String username, String password) {
+	public LoginStatus tryLogin(String username, char[] password) {
 		Account account = accounts.get(username);
 		if (account == null) {
+			// Hash the password anyway so the user can't see why we failed
+			// (improves timing similarity and clears the password array).
+			hashPassword(password, DUMMY_SALT);
 			return LoginStatus.FAILURE;
 		}
 
+		String passHash = hashPassword(account.getPasswordProtocol(), password, account.getSalt());
+
 		// Safe because the empty string is not a valid password
-		if (account.getPassword().equals(password)) {
+		if (account.getPassHash().equals(passHash)) {
 			switch (account.getPermissions()) {
 				case ADMIN:
 					return LoginStatus.ADMIN;

@@ -3,7 +3,9 @@ package database;
 import java.sql.*;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.function.Function;
 
+import hashing.HashProtocol;
 import entities.*;
 import entities.Account.AccessLevel;
 
@@ -89,7 +91,7 @@ class DatabaseLoader
 
 		if(am.getAccounts().values().stream().noneMatch(a -> Account.AccessLevel.ADMIN == a.getPermissions())) {
 			System.out.println("No admin exists, setting default admin to 'admin' 'password'");
-			am.addAccount("admin", "password", AccessLevel.ADMIN);
+			am.addNewAccount("admin", AccessLevel.ADMIN, "password".toCharArray());
 		}
 	}
 
@@ -238,24 +240,28 @@ class DatabaseLoader
 			Statement queryUsers = this.db_connection.createStatement();
 			ResultSet resultUsers = queryUsers.executeQuery(StoredProcedures.procRetrieveUsers());
 			while (resultUsers.next()) {
-				String name = resultUsers.getString("userID");
-				String savedPermission = resultUsers.getString("permission");
-				AccessLevel permission;
-				try {
-					permission = AccessLevel.valueOf(savedPermission);
-				} catch (IllegalArgumentException e) {
-					throw new DatabaseException(String.format(
-							"User has invalid permissions '%s'; database may be corrupt.",
-							savedPermission));
-				}
-				accounts.addAccount(name,
+				accounts.loadAccount(
+						resultUsers.getString("userID"),
+						getEnum(resultUsers, "permission", AccessLevel::valueOf),
+						getEnum(resultUsers, "hashProtocol", HashProtocol::valueOf),
 						resultUsers.getString("passHash"),
-						permission);
+						resultUsers.getString("salt"));
 			}
 			resultUsers.close();
 			queryUsers.close();
 		} catch (SQLException e){
 			throw e;
+		}
+	}
+
+	private <T extends Enum<T>> T getEnum(ResultSet rs, String field, Function<String, T> valueOfReference)
+			throws SQLException, DatabaseException {
+		String savedValue = rs.getString(field);
+		try {
+			return valueOfReference.apply(savedValue);
+		} catch (IllegalArgumentException e) {
+			throw new DatabaseException(
+					String.format("Invalid value for field '%s'; database may be corrupt.", field));
 		}
 	}
 
@@ -369,8 +375,10 @@ class DatabaseLoader
 				Account thisAccount = user.getValue();
 				StoredProcedures.insertUser(db_connection,
 						thisAccount.getUsername(),
-						thisAccount.getPassword(),
-						thisAccount.getPermissions());
+						thisAccount.getPermissions(),
+						thisAccount.getPassHash(),
+						thisAccount.getSalt(),
+						thisAccount.getPasswordProtocol());
 			}
 		} catch (SQLException e) {
 			throw new DatabaseException("Failed to update database; database may be corrupt: " + e.getMessage(), e);
