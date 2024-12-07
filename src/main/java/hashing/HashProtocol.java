@@ -11,6 +11,7 @@ public enum HashProtocol {
 	 */
 	// TODO: Remove dummy has after adding a real hash
 	DUMMY_NO_HASH((password, salt) -> String.valueOf(password)),
+	SHA256V1(Sha256Hash.getV1()),
 	;
 
 	private final HashFunction hashFunction;
