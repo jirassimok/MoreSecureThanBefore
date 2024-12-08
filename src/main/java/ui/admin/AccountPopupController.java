@@ -13,7 +13,9 @@ import javafx.util.Callback;
 
 import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -25,6 +27,8 @@ public class AccountPopupController
 {
 	private static final int MIN_PASSWORD_LENGTH = 8;
 	private static final String NEW_USER_NAME = "newuser";
+	private static final int RANDOM_PASSWORD_BYTES = 100;
+	private final SecureRandom PASSWORD_RANDOM = new SecureRandom();
 
 	@FXML private Button doneBtn;
 	@FXML private TableView<Account> accountTableView;
@@ -121,7 +125,7 @@ public class AccountPopupController
 			Account newAccount;
 			try {
 				newAccount = getAccountManager().addNewAccount(
-						"newuser", AccessLevel.PROFESSIONAL, "newpassword".toCharArray());
+						"newuser", AccessLevel.PROFESSIONAL, randomPassword());
 				displayError("User created; please change name and password.");
 			} catch (GeneralSecurityException e) {
 				e.printStackTrace();
@@ -148,5 +152,23 @@ public class AccountPopupController
 	public void ondoneBtnClick(){
 		getAccountManager().deleteAccount(NEW_USER_NAME);
 		doneBtn.getScene().getWindow().hide();
+	}
+
+	private char[] randomPassword() {
+		byte[] bytes = new byte[RANDOM_PASSWORD_BYTES];
+		PASSWORD_RANDOM.nextBytes(bytes);
+
+		// Java offers no clean way to directly Base64-encode a byte[] in a char[],
+		// but it does specify the encoding of the bytes, so we can do it manually.
+		byte[] encoded = Base64.getEncoder().encode(bytes);
+		Arrays.fill(bytes, (byte) 0);
+		char[] password = new char[encoded.length];
+		for (int i = 0; i < password.length; ++i) {
+			// We know base64 encodes into a limited subset of ISO-8859-1 (Latin-1),
+			// so we can do this cast safely.
+			password[i] = (char) encoded[i];
+		}
+		Arrays.fill(encoded, (byte) 0);
+		return password;
 	}
 }
