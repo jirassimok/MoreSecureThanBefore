@@ -2,9 +2,9 @@ package ui.user;
 
 
 import entities.AccountManager;
-import entities.AccountManager.LoginStatus;
 import entities.Directory;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -25,13 +25,13 @@ import memento.TimeoutTimer;
 import java.io.IOException;
 import java.net.URL;
 
+import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class LoginController implements Initializable{
 	// TODO: Make this configurable
-	private static final int LOGIN_RETRY_DELAY = 2000;
+	private static final long LOGIN_RETRY_DELAY = TimeUnit.MILLISECONDS.toNanos(3000);
 
 	@FXML private Label errorLbl;
 	@FXML private Button cancelBtn;
@@ -43,9 +43,6 @@ public class LoginController implements Initializable{
 	private Directory directory = ApplicationController.getDirectory();
 	private AccountManager accountManager = ApplicationController.getAccountManager();
 	private TimeoutTimer timer = TimeoutTimer.getTimeoutTimer();
-	private Timer retryTimer = new Timer();
-	// This is a field for reference equality purposes
-	private Runnable timerCancelCallback = retryTimer::cancel;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -67,7 +64,6 @@ public class LoginController implements Initializable{
 		timer.emptyTasks();
 		this.initGlobalFilter();
 		TimeoutTimer.getTimeoutTimer().registerTask(this::resetState);
-		ApplicationController.registerCloseCallback(timerCancelCallback);
 	}
 
 	private void lockControls() {
@@ -77,43 +73,85 @@ public class LoginController implements Initializable{
 		passwordField.setEditable(false);
 	}
 
-	private void unlockControls() {
+	private void restartForm() {
+		passwordField.clear();
 		cancelBtn.setDisable(false);
 		loginBtn.setDisable(false);
 		usernameField.setEditable(true);
 		passwordField.setEditable(true);
+		usernameField.selectAll();
 	}
 
 	/**
-	 * Start a timer that waits before unlocking the controls.
+	 * Task representing login computation.
+	 *
+	 * <p>Internally handles success and failure.
 	 */
-	private void startRetryTimer() {
-		this.retryTimer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				passwordField.clear();
-				unlockControls();
-				usernameField.selectAll();
+	private class LoginTask extends Task<Optional<Parent>> {
+		/**
+		 * Returns the new root FXML element on success, or an empty Optional on failure.
+		 */
+		@Override
+		protected Optional<Parent> call() throws IOException, InterruptedException {
+			long startTime = System.nanoTime();
+			switch (accountManager.tryLogin(usernameField.getText(), getPasswordAsArray())) {
+				case ADMIN:
+					return Optional.of(loadFXML("/AdminUI.fxml"));
+				case PROFESSIONAL:
+					return Optional.of(loadFXML("/UserDestination.fxml"));
+				default:
+					// Wait before allowing another login attempt
+					long nanos = System.nanoTime() - startTime;
+					try {
+						TimeUnit.NANOSECONDS.sleep(LOGIN_RETRY_DELAY - nanos);
+					} catch (InterruptedException e) {
+						if (this.isCancelled()) {
+							restartForm();
+						} else {
+							throw e;
+						}
+					}
+					return Optional.empty();
 			}
-		}, LOGIN_RETRY_DELAY);
+		}
+
+		@Override
+		protected void succeeded() {
+			super.succeeded();
+			if (getValue().isPresent()) {
+				changeScene(getValue().get());
+			} else {
+				errorLbl.setText("Incorrect Username or Password");
+				restartForm();
+				usernameField.requestFocus();
+			}
+		}
+
+		@Override
+		protected void failed() {
+			super.failed();
+			errorLbl.setText("Error logging in; see logs.");
+			restartForm();
+		}
+	}
+
+	/** Load the page for the logged-in user. */
+	private Parent loadFXML(String resourcePath) throws IOException {
+		try {
+			return FXMLLoader.load(this.getClass().getResource(resourcePath));
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@FXML
-	public void loginBtnClicked() throws IOException {
+	public void loginBtnClicked() {
 		this.lockControls();
-		switch (accountManager.tryLogin(this.usernameField.getText(), getPasswordAsArray())) {
-			case ADMIN:
-				// directory.logIn(); // Admins start viewing the user screen
-				changeScene(FXMLLoader.load(this.getClass().getResource("/AdminUI.fxml")));
-				break;
-			case PROFESSIONAL:
-				changeScene(FXMLLoader.load(this.getClass().getResource("/UserDestination.fxml")));
-				break;
-			default:
-				this.errorLbl.setText("Incorrect Username or Password");
-				this.usernameField.requestFocus();
-				this.startRetryTimer();
-		}
+		Task<?> loginTask = new LoginTask();
+		Thread thread = new Thread(loginTask);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	/**
@@ -157,12 +195,7 @@ public class LoginController implements Initializable{
 	@FXML
 	public void enterPressed(KeyEvent e){
 		if ( e.getCode() == KeyCode.ENTER){
-			try {
-				this.loginBtnClicked();
-			} catch (IOException ex) {
-				System.err.println("IOException during login attempt");
-				throw new RuntimeException(ex);
-			}
+			this.loginBtnClicked();
 		}
 	}
 
@@ -191,24 +224,13 @@ public class LoginController implements Initializable{
 		});
 	}
 
-	/**
-	 * Close the retry timer. After this is called, the timer will no longer work;
-	 * use it only when leaving the page or closing the application.
-	 */
-	private void closeRetryTimer() {
-		timerCancelCallback.run();
-		ApplicationController.deregisterCloseCallback(timerCancelCallback);
-	}
-
 	public void changeScene(Parent newRoot) {
-		closeRetryTimer();
 		parentBorderPane.getScene().setRoot(newRoot);
 	}
 
 	// place inside controller
 	public void resetState() {
 		accountManager.logOut();
-		closeRetryTimer();
 		parentBorderPane.getScene().setRoot(directory.getCaretaker().getState().getRoot());
 	}
 }
