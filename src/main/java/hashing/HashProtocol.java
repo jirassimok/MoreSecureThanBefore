@@ -9,7 +9,7 @@ public enum HashProtocol {
 	/**
 	 * Fake hash that does nothing at all.
 	 */
-	SHA256V1(Sha256Hash.getV1()),
+	SHA256V1(SimpleJCAHash.getV1()),
 	;
 
 	private final HashFunction hashFunction;

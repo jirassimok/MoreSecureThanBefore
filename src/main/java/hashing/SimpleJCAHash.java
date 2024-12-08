@@ -6,18 +6,18 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
-class Sha256Hash implements HashFunction {
-	private static final Sha256Hash V1 = new Sha256Hash(600_000, 512);
+class SimpleJCAHash implements HashFunction {
+	private static final SimpleJCAHash V1 = new SimpleJCAHash(600_000, 512);
 
 	private final int hashSize;
 	private final int iterations;
 
-	private Sha256Hash (int iterations, int hashSize) {
+	private SimpleJCAHash(int iterations, int hashSize) {
 		this.iterations = iterations;
 		this.hashSize = hashSize;
 	}
 
-	static Sha256Hash getV1() {
+	static SimpleJCAHash getV1() {
 		return V1;
 	}
 
