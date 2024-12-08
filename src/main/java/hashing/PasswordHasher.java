@@ -7,7 +7,7 @@ import java.util.Base64;
 
 public class PasswordHasher {
 	private static final int SALT_BYTES = 16;
-	public static final HashProtocol DEFAULT_PROTOCOL = HashProtocol.SHA256V1;
+	public static final HashProtocol DEFAULT_PROTOCOL = HashProtocol.SHA512V1;
 
 	// Use Java's most-preferred secure PRNG and let it seed itself.
 	private static final SecureRandom random = new SecureRandom();

@@ -3,13 +3,14 @@ package hashing;
 import java.security.GeneralSecurityException;
 
 /**
- * The types of password hash understood by {@link PasswordHasher}.
+ * Hard-coded registry for {@link HashFunction}s.
  */
 public enum HashProtocol {
 	/**
 	 * Fake hash that does nothing at all.
 	 */
-	SHA256V1(SimpleJCAHash.getV1()),
+	SHA256V1(SimpleJCAHash.SHA512_V1),
+	SHA512V1(SimpleJCAHash.SHA512_V1),
 	;
 
 	private final HashFunction hashFunction;
