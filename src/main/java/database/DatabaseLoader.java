@@ -375,7 +375,6 @@ class DatabaseLoader
 	 */
 	private void saveAccounts(AccountManager am) throws DatabaseException {
 		try {
-			Connection db = db_connection;
 			for (Map.Entry<String, Account> user : am.getAccounts().entrySet()) {
 				Account thisAccount = user.getValue();
 				StoredProcedures.insertUser(db_connection,
