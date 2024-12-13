@@ -118,8 +118,9 @@ public class LoginController implements Initializable{
 		@Override
 		protected void succeeded() {
 			super.succeeded();
-			if (getValue().isPresent()) {
-				changeScene(getValue().get());
+			Optional<Parent> newRoot = getValue();
+			if (newRoot.isPresent()) {
+				changeScene(newRoot.get());
 			} else {
 				errorLbl.setText("Incorrect Username or Password");
 				restartForm();
