@@ -152,13 +152,14 @@ class DatabaseConnector
 	}
 
 	public void reInitUsersSchema() throws DatabaseException {
-		Statement stmt;
-		try {
-			stmt = this.db_connection.createStatement();
+		try (Statement stmt = this.db_connection.createStatement()) {
+			this.reInitUsersSchemaInner(stmt);
 		} catch (SQLException e) {
-			throw new DatabaseException("Failed to create statement", e);
+			throw new DatabaseException("Error opening or closing statement", e);
 		}
+	}
 
+	private void reInitUsersSchemaInner(Statement stmt) throws DatabaseException {
 		for (String dropStatement : StoredProcedures.getUsersDrops()) {
 			//drop the table if it exists
 			try {
