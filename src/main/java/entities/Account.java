@@ -49,10 +49,10 @@ public class Account
 	/* **** Password Access **** */
 
 	public void changePassword(char[] newPassword) throws GeneralSecurityException {
-		String salt = PasswordHasher.generateSalt();
-		this.passHash = PasswordHasher.hashPassword(newPassword, salt);
+		String newSalt = PasswordHasher.generateSalt();
+		this.passHash = PasswordHasher.hashPassword(newPassword, newSalt);
 		this.passwordProtocol = PasswordHasher.DEFAULT_PROTOCOL;
-		this.salt = salt;
+		this.salt = newSalt;
 	}
 
 	Account(AccountManager manager, String username, AccessLevel permission,
