@@ -58,10 +58,6 @@ public class ApplicationController extends Application
 		return closeCallbacks.remove(callback);
 	}
 
-	public static void main(String[] args) {
-		Application.launch(args);
-	}
-
 	@Override
 	public void init() throws Exception {
 		closeCallbacks = new HashSet<>();
