@@ -1,7 +1,6 @@
 package hashing;
 
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 
 @FunctionalInterface
 interface HashFunction {
