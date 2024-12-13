@@ -103,10 +103,6 @@ public class AccountPopupController
 		errorField.setVisible(true);
 	}
 
-	private void hideError() {
-		errorField.setVisible(false);
-	}
-
 	private void hideError(String message) {
 		if (message.equals(errorField.getText())) {
 			errorField.setVisible(false);
