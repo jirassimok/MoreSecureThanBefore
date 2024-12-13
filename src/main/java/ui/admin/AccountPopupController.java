@@ -121,7 +121,7 @@ public class AccountPopupController
 			Account newAccount;
 			try {
 				newAccount = getAccountManager().addNewAccount(
-						"newuser", AccessLevel.PROFESSIONAL, randomPassword());
+						NEW_USER_NAME, AccessLevel.PROFESSIONAL, randomPassword());
 				displayError("User created; please change name and password.");
 			} catch (GeneralSecurityException e) {
 				e.printStackTrace();
