@@ -28,7 +28,7 @@ public class AccountPopupController
 	private static final int MIN_PASSWORD_LENGTH = 8;
 	private static final String NEW_USER_NAME = "newuser";
 	private static final int RANDOM_PASSWORD_BYTES = 100;
-	private final SecureRandom PASSWORD_RANDOM = new SecureRandom();
+	private static final SecureRandom PASSWORD_RANDOM = new SecureRandom();
 
 	@FXML private Button doneBtn;
 	@FXML private TableView<Account> accountTableView;
