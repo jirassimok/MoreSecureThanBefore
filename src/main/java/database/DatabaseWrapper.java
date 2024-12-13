@@ -46,9 +46,9 @@ public class DatabaseWrapper
 	 * Save the contents of the given directory as the database
 	 */
 	public void saveDirectory(Directory directory) {
-		DatabaseLoader DBL = new DatabaseLoader(DBConn);
+		DatabaseLoader dbl = new DatabaseLoader(DBConn);
 		try {
-			DBL.destructiveSaveDirectory(directory);
+			dbl.destructiveSaveDirectory(directory);
 		} catch (DatabaseException e) {
 			System.err.println("\n\nDATABASE DAMAGED\n\n");
 			e.printStackTrace();
@@ -60,9 +60,9 @@ public class DatabaseWrapper
 	 * Save the contents of the given directory as the database
 	 */
 	public void saveAccounts(AccountManager accounts) {
-		DatabaseLoader DBL = new DatabaseLoader(DBConn);
+		DatabaseLoader dbl = new DatabaseLoader(DBConn);
 		try {
-			DBL.destructiveSaveAccounts(accounts);
+			dbl.destructiveSaveAccounts(accounts);
 		} catch (DatabaseException e) {
 			System.err.println("\n\nDATABASE DAMAGED\n\n");
 			e.printStackTrace();
