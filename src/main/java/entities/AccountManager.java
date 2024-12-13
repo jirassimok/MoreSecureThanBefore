@@ -85,7 +85,10 @@ public class AccountManager {
 			// (improves timing similarity and clears the password array).
 			try {
 				hashPassword(password, DUMMY_SALT);
-			} catch (GeneralSecurityException e) {}
+			} catch (GeneralSecurityException e) {
+				e.printStackTrace();
+				System.out.println("Error hashing dumbing password");
+			}
 			return LoginStatus.FAILURE;
 		}
 
