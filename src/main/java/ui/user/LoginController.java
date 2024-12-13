@@ -134,15 +134,15 @@ public class LoginController implements Initializable{
 			errorLbl.setText("Error logging in; see logs.");
 			restartForm();
 		}
-	}
 
-	/** Load the page for the logged-in user. */
-	private Parent loadFXML(String resourcePath) throws IOException {
-		try {
-			return FXMLLoader.load(this.getClass().getResource(resourcePath));
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
+		/** Load the page for the logged-in user. */
+		private Parent loadFXML(String resourcePath) throws IOException {
+			try {
+				return FXMLLoader.load(this.getClass().getResource(resourcePath));
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw e;
+			}
 		}
 	}
 
