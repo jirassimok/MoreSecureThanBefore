@@ -46,6 +46,12 @@ public class ApplicationController extends Application
 
 	@Override
 	public void init() throws Exception {
+		if (ApplicationController.directory != null
+				|| ApplicationController.accountManager != null
+				|| ApplicationController.iconController != null) {
+			throw new IllegalStateException("Application already initialized");
+		}
+
 		try {
 			DatabaseWrapper.getInstance().init();
 		} catch (DatabaseException e) {
@@ -72,6 +78,9 @@ public class ApplicationController extends Application
 	/** This is called by JavaFX and starts up the application UI user panel*/
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		if (ApplicationController.stage != null) {
+			throw new IllegalStateException("Application already has a stage");
+		}
 		ApplicationController.stage = primaryStage;
 		Parent root = (Pane) FXMLLoader.load(this.getClass().getResource("/Welcome.fxml"));
 		primaryStage.setTitle("FFSM Navigator");
