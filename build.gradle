@@ -9,60 +9,65 @@
 
 buildscript { // this stuff operates on the rest of the scrpt; adds plugin for the script itself
     dependencies {
-        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+        classpath 'org.openjfx:javafx-plugin:0.1.0'
         classpath group: 'org.sonatype.gradle.plugins', name: 'scan-gradle-plugin', version: '2.8.3'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:5.1.0.4882'
     }
     repositories {
         mavenLocal()
         mavenCentral()
-
+        gradlePluginPortal()
     }
 }
 
+
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
-apply plugin: 'javafx-gradle-plugin'
+apply plugin: 'application'
+apply plugin: 'org.openjfx.javafxplugin'
 apply plugin: 'org.sonatype.gradle.plugins.scan'
+apply plugin: 'org.sonarqube'
 
-// In this section you declare where to find the dependencies of your project
 repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
 }
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile "com.twilio.sdk:twilio:7.8.0"
+    implementation "com.twilio.sdk:twilio:7.8.0"
 
     // The production code uses the SLF4J logging API at compile time
-    compile 'org.slf4j:slf4j-api:1.7.21'
+    implementation 'org.slf4j:slf4j-api:1.7.21'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 
     /* Derby jdbc thing. From here:
     https://mvnrepository.com/artifact/org.apache.derby/derby
     */
-    compile group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
+    runtimeOnly group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
 
     // theming library for javafx
-    compile 'com.jfoenix:jfoenix:1.2.0'
+    implementation 'com.jfoenix:jfoenix:1.2.0'
 
     // Apache Commons gets us a few useful utilities
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
 }
 
-jfx {
-    // minimal requirement for jfxJar-task
+application {
     mainClass = 'main.ApplicationController'
+}
 
-    // minimal requirement for jfxNative-task
-    vendor = 'fuschia-flying-spaghetti-monster'
+javafx {
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics' ]
 }
 
 sourceSets {
@@ -78,16 +83,16 @@ sourceSets {
     }
 }
 
-//test { // show stdout and stderr when running tests
-//    testLogging.showStandardStreams = true
-//}
-
-
-// Use main class for jar
 jar {
     manifest.attributes("Main-Class": "main.ApplicationController")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
 
+tasks.register("j") {
+    doLast {
+        println System.getProperty("java.home")
+    }
 }
